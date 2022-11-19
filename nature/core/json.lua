@@ -1,7 +1,7 @@
 local log = require('nature.core.log')
 local jsonschema = require('jsonschema')
 local lrucache = require("nature.core.lrucache")
--- local cached_validator = lrucache.new({ count = 1000, ttl = 0 })
+local cached_validator = lrucache.new(1000, 0, true)
 
 local _M = {
     decode = require('cjson.safe').decode,
@@ -26,34 +26,34 @@ function _M.delay_encode(data)
     return delay_tab
 end
 
--- local function create_validator(schema)
---     local ok, res = pcall(jsonschema.generate_validator, schema)
---     if ok then
---         return res
---     end
+local function create_validator(schema)
+    local ok, res = pcall(jsonschema.generate_validator, schema)
+    if ok then
+        return res
+    end
 
---     return nil, res
--- end
+    return nil, res
+end
 
--- local function get_validator(schema)
---     local validator, err = cached_validator(schema, nil, create_validator,
---         schema)
+local function get_validator(key, schema)
+    local validator, err = cached_validator(key, create_validator,
+        schema)
 
---     if not validator then
---         return nil, err
---     end
+    if not validator then
+        return nil, err
+    end
 
---     return validator, nil
--- end
+    return validator, nil
+end
 
--- function _M.checkSchema(schema, json)
---     local validator, err = get_validator(schema)
+function _M.checkSchema(key, schema, json)
+    local validator, err = get_validator(key, schema)
 
---     if not validator then
---         return false, err
---     end
+    if not validator then
+        return false, err
+    end
 
---     return validator(json)
--- end
+    return validator(json)
+end
 
 return _M

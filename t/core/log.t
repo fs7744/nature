@@ -40,3 +40,18 @@ GET /t
 --- error_log
 dd is 4
 
+=== log set_filter_level Warn should no log
+--- config
+location /t {
+    content_by_lua_block {
+        local log = require("nature.core.log")
+        log.set_filter_level(ngx.WARN)
+        log.info('dd is ', log.delay_exec(function(i) 
+            return i
+        end, 4))
+    }
+}
+--- request
+GET /t
+--- no_error_log
+[error]

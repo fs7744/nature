@@ -43,4 +43,101 @@ function _M.has_suffix(s, suffix)
     return rc == 0
 end
 
+_M.split = ngx_re.split
+_M.re_gsub = ngx.re.gsub
+local re_find = ngx.re.find
+_M.re_find = re_find
+_M.re_match = ngx.re.match
+
+function _M.r_pad(s, l, c)
+    return s .. string.rep(c or ' ', l - #s)
+end
+
+local string_char = string.char
+local function from_hex_char(cc)
+    return string_char(tonumber(cc, 16))
+end
+
+function _M.from_hex(str)
+    return (str:gsub('..', from_hex_char))
+end
+
+local BUF_MAX_LEN = 1024
+local hex_buf = ffi_new(str_type, BUF_MAX_LEN)
+function _M.to_hex(s)
+    local len = #s
+    local buf_len = len * 2
+    local buf
+    if buf_len <= BUF_MAX_LEN then
+        buf = hex_buf
+    else
+        buf = ffi_new(str_type, buf_len)
+    end
+    C.ngx_hex_dump(buf, s, len)
+    return ffi_str(buf, buf_len)
+end
+
+function _M.uri_safe_encode(uri)
+    if not uri then
+        return uri
+    end
+    return ngx_escape_uri(uri)
+end
+
+local function find_last(s, needle)
+    if not s then
+        return nil
+    end
+    local i = s:match(".*" .. needle .. "()")
+    return i
+end
+
+_M.find_last = find_last
+
+local string_sub = string.sub
+local function get_last_sub(path, regex)
+    local i = find_last(path, regex)
+    if i then
+        return string_sub(path, i)
+    end
+    return nil
+end
+
+_M.get_last_sub = get_last_sub
+local string_lower = string.lower
+function _M.get_file_ext(path)
+    local p = get_last_sub(path, '/')
+    if not p then
+        p = path
+    end
+    local r = get_last_sub(p, '%.')
+    if r then
+        return string_lower(r)
+    end
+    return r
+end
+
+local C_RAND_bytes = C.RAND_bytes
+local C_RAND_pseudo_bytes = C.RAND_pseudo_bytes
+function _M.rand_bytes(len, strong)
+    local buf = ffi_new("char[?]", len)
+    if strong then
+        if C_RAND_bytes(buf, len) == 0 then
+            return nil
+        end
+    else
+        C_RAND_pseudo_bytes(buf, len)
+    end
+
+    return ffi_str(buf, len)
+end
+
+function _M.re_sub(subject, regex, options, ctx, nth)
+    local from, to = re_find(subject, regex, options, ctx, nth)
+    if from then
+        return string_sub(subject, from, to)
+    end
+    return nil
+end
+
 return _M
