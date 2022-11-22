@@ -62,20 +62,7 @@ function _M.from_hex(str)
     return (str:gsub('..', from_hex_char))
 end
 
-local BUF_MAX_LEN = 1024
-local hex_buf = ffi_new(str_type, BUF_MAX_LEN)
-function _M.to_hex(s)
-    local len = #s
-    local buf_len = len * 2
-    local buf
-    if buf_len <= BUF_MAX_LEN then
-        buf = hex_buf
-    else
-        buf = ffi_new(str_type, buf_len)
-    end
-    C.ngx_hex_dump(buf, s, len)
-    return ffi_str(buf, buf_len)
-end
+_M.to_hex = require("resty.string").to_hex
 
 function _M.uri_safe_encode(uri)
     if not uri then
@@ -138,6 +125,13 @@ function _M.re_sub(subject, regex, options, ctx, nth)
         return string_sub(subject, from, to)
     end
     return nil
+end
+
+_M.encode_base64 = ngx.encode_base64
+_M.decode_base64 = ngx.decode_base64
+
+function _M.trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
 return _M

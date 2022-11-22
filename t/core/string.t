@@ -355,3 +355,55 @@ location / {
 [200,200,200,200,200.200]
 --- no_error_log
 [error]
+
+=== string encode_base64 and decode_base64 should match
+--- config
+location /t {
+    content_by_lua_block {
+        local str = require("nature.core.string")
+        local cases = {
+            '/ds/dsd/dd',
+            '/ds/dsd/dd',
+            '',
+            nil
+        }
+        for _, case in ipairs(cases) do
+            local ok, r, err1 = pcall(str.encode_base64, case)
+            local ok2, r2, err2 = pcall(str.decode_base64, r)
+            if not ok or not ok2 then
+                ngx.log(ngx.ERR, "error", err1," ", err2)
+            elseif case ~= r2 then
+                ngx.log(ngx.ERR, "unexpected r2: ", r2," ", case)
+            end
+        end
+    }
+}
+--- request
+GET /t
+--- no_error_log
+[error]
+
+=== string trim should match
+--- config
+location /t {
+    content_by_lua_block {
+        local str = require("nature.core.string")
+        local json = require("nature.core.json")
+        local cases = {
+            {' /ds/dsd /dd ', '/ds/dsd /dd'},
+            {' /ds/aa/dd','/ds/aa/dd'},
+            {'/ds/aa/dd ','/ds/aa/dd'},
+            {' ',''}
+        }
+        for _, case in ipairs(cases) do
+            local ok, r, err1 = pcall(str.trim, case[1])
+            if not ok or r ~= case[2] then
+                ngx.log(ngx.ERR, "unexpected r: ", r, " ", json.encode(case))
+            end
+        end
+    }
+}
+--- request
+GET /t
+--- no_error_log
+[error]
