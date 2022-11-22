@@ -52,7 +52,7 @@ local function parse_args(args, cmd)
     while i <= max do
         n = args[i]
         if n and str.has_prefix(n, '-') then
-            local ps = str.split(n, '=', 2)
+            local ps = str.split(n, '=', nil, nil, 2)
             local k = str.re_gsub(ps[1], '-', '', 'jo')
             local v = ps[2]
             if not v and args[i + 1] and not str.has_prefix(args[i + 1], '-') then
