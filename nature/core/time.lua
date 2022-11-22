@@ -17,7 +17,7 @@ function _M.current_time_millis()
     C.gettimeofday(tm, nil);
     local sec = tonumber(tm.tv_sec)
     local usec = tonumber(tm.tv_usec)
-    return sec + usec * 10 ^ -6;
+    return sec + usec * 10 ^ -6
 end
 
 local function sleep(sec)
