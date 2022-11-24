@@ -367,9 +367,71 @@ location /t {
             '',
             nil
         }
+        for i = 1, 10 do
+            table.insert(cases, str.rand_bytes(i, true))
+        end
+        local function toBase64(source_str)
+            local b64chars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+            local s64 = ""
+            local str = source_str
+
+            while #str > 0 do
+                local bytes_num, buf = 0, 0
+                for byte_cnt = 1, 3 do
+                    buf = (buf * 256)
+                    if #str > 0 then
+                        buf = buf + string.byte(str, 1, 1)
+                        str = string.sub(str, 2)
+                        bytes_num = bytes_num + 1
+                    end
+                end
+
+                for group_cnt = 1, (bytes_num + 1) do
+                    local b64char = math.fmod(math.floor(buf / 262144), 64) + 1
+                    s64 = s64 .. string.sub(b64chars, b64char, b64char)
+                    buf = buf * 64
+                end
+
+                for fill_cnt = 1, (3 - bytes_num) do
+                    s64 = s64 .. "="
+                end
+            end
+
+            return s64
+        end
         for _, case in ipairs(cases) do
-            local ok, r, err1 = pcall(str.encode_base64, case)
+            local ok, r, err1 = pcall(toBase64, case)
             local ok2, r2, err2 = pcall(str.decode_base64, r)
+            if not ok or not ok2 then
+                ngx.log(ngx.ERR, "error ", r, err1," ", r2, err2)
+            elseif case ~= r2 then
+                ngx.log(ngx.ERR, "unexpected r2: ", r2," ", case)
+            end
+        end
+    }
+}
+--- request
+GET /t
+--- no_error_log
+[error]
+
+
+
+=== string encode_base64url and decode_base64url should match
+--- config
+location /t {
+    content_by_lua_block {
+        local str = require("nature.core.string")
+        local cases = {
+            '/ds/dsd/dd',
+            '/ds/dsd/dd',
+            '',
+            nil
+        }
+        for _, case in ipairs(cases) do
+            local ok, r, err1 = pcall(str.encode_base64url, case)
+            local ok2, r2, err2 = pcall(str.decode_base64url, r)
             if not ok or not ok2 then
                 ngx.log(ngx.ERR, "error", err1," ", err2)
             elseif case ~= r2 then

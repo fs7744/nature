@@ -129,6 +129,8 @@ end
 
 _M.encode_base64 = ngx.encode_base64
 _M.decode_base64 = ngx.decode_base64
+_M.encode_base64url = require("ngx.base64").encode_base64url
+_M.decode_base64url = require("ngx.base64").decode_base64url
 
 function _M.trim(s)
     return (s:gsub("^%s*(.-)%s*$", "%1"))
