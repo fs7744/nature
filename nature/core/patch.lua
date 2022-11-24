@@ -3,3 +3,11 @@ if require("nature.core.os").os_name == "Linux" then
 end
 require("jit.opt").start("minstitch=2", "maxtrace=4000", "maxrecord=8000",
     "sizemcode=64", "maxmcode=4000", "maxirconst=1000")
+
+local _M = {}
+
+function _M.patch()
+
+end
+
+return _M
