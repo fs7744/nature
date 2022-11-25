@@ -30,4 +30,8 @@ function _M.is_http_system()
     return subsystem() == 'http'
 end
 
+function _M.sys_prefix()
+    return _M.is_http_system() and '' or 'stream_'
+end
+
 return _M

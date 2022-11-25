@@ -20,7 +20,7 @@ local function new_lru_fun(max, ttl, read, flags)
     end
 end
 
-local lock_shdict_name = "lrucache_lock"
+local lock_shdict_name = require('nature.core.ngp').sys_prefix() .. "lrucache_lock"
 local can_yield_phases = {
     ssl_session_fetch = true,
     ssl_session_store = true,

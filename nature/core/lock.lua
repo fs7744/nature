@@ -1,6 +1,6 @@
 local resty_lock = require("resty.lock")
 
-local lock_shdict_name = "lrucache_lock"
+local lock_shdict_name = require('nature.core.ngp').sys_prefix() .. "lrucache_lock"
 
 local _M = {}
 
