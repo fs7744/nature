@@ -24,8 +24,12 @@ end
 
 local e = env(arg[1])
 
-local generate_params = {
-
+local conf_params = {
+    name = "conf",
+    short_name = "c",
+    description = "output generate nginx.conf",
+    required = true,
+    default = e.home .. '/nginx.conf'
 }
 
 local cmds = {
@@ -33,9 +37,55 @@ local cmds = {
         name = "version",
         description = "show nature version",
         fn = function()
-            print(0.1)
+            print(require("nature").version)
         end
     },
+    {
+        name = "init",
+        description = "init conf",
+        options = {
+
+        },
+        fn = function(env, args)
+            return require('nature.cli.conf').generate(env, args)
+        end
+    },
+    {
+        name = "start",
+        description = "start nature",
+        options = conf_params,
+        fn = function(env, args)
+            if cmd.execute_cmd(env.openresty_args .. args.conf .. " -g 'daemon off;'") then
+                return 'Started nature'
+            else
+                return 'Started failed '
+            end
+        end
+    },
+    {
+        name = "reload",
+        description = "reload nature",
+        options = conf_params,
+        fn = function(env, args)
+            if cmd.execute_cmd(env.openresty_args .. args.output .. " -s reload") then
+                return 'Reloaded nature'
+            else
+                return 'Reloaded failed'
+            end
+        end
+    },
+    {
+        name = "stop",
+        description = "stop nature",
+        options = conf_params,
+        fn = function(env, args)
+            if cmd.execute_cmd(env.openresty_args .. args.output .. " -s stop") then
+                return 'Stoped nature'
+            else
+                return 'Stoped failed'
+            end
+        end
+    }
 }
 
 cmd.execute(cmds, e, arg)

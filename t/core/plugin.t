@@ -16,7 +16,7 @@ location /t {
         local ctx = context.new_api_context()
         local plugin = require("nature.core.plugin")
         plugin.load({'t.lua.plugin_test' })
-        plugin.run('rewrite', {'t.lua.plugin_test' }, ctx)
+        plugin.run('rewrite', {{ name ='t.lua.plugin_test'} }, ctx)
     }
 }
 --- request
@@ -48,7 +48,7 @@ location /t {
         local ctx = context.new_api_context()
         local plugin = require("nature.core.plugin")
         plugin.load({'t.lua.plugin_test' })
-        plugin.run('rewrite1', {'t.lua.plugin_test' }, ctx)
+        plugin.run('rewrite1', {{ name ='t.lua.plugin_test'} }, ctx)
     }
 }
 --- request
@@ -66,7 +66,7 @@ location /t {
         local ctx = context.new_api_context()
         local plugin = require("nature.core.plugin")
         plugin.load({'t.lua.plugin_error', 't.lua.plugin_test' })
-        plugin.run('rewrite', {'t.lua.plugin_error', 't.lua.plugin_test' }, ctx)
+        plugin.run('rewrite', {{ name ='t.lua.plugin_error'}, { name ='t.lua.plugin_test' }}, ctx)
     }
 }
 --- request
@@ -82,7 +82,7 @@ location /t {
         local ctx = context.new_api_context()
         local plugin = require("nature.core.plugin")
         plugin.load({'t.lua.plugin_error', 't.lua.plugin_test' })
-        plugin.run_without_stop('rewrite', {'t.lua.plugin_error', 't.lua.plugin_test' }, ctx)
+        plugin.run_without_stop('rewrite', {{ name ='t.lua.plugin_error'}, { name ='t.lua.plugin_test' }}, ctx)
     }
 }
 --- request

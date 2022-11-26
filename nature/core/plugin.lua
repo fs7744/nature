@@ -51,12 +51,13 @@ function _M.run(fnName, list, ctx)
     if ctx.stop then
         return
     end
-    for _, pkg_name in ipairs(list) do
+    for _, pkg in ipairs(list) do
+        local pkg_name = pkg.name
         local p = plugins[pkg_name]
         if p then
             p = p[fnName]
             if p then
-                local r, err = pcall(p, ctx)
+                local r, err = pcall(p, ctx, pkg)
                 if not r then
                     log.error(fnName, ' exec ', pkg_name, ' failed: ', err)
                 end
@@ -71,12 +72,13 @@ function _M.run(fnName, list, ctx)
 end
 
 function _M.run_without_stop(fnName, list, ctx)
-    for _, pkg_name in ipairs(list) do
+    for _, pkg in ipairs(list) do
+        local pkg_name = pkg.name
         local p = plugins[pkg_name]
         if p then
             p = p[fnName]
             if p then
-                local r, err = pcall(p, ctx)
+                local r, err = pcall(p, ctx, pkg)
                 if not r then
                     log.error(fnName, ' exec ', pkg_name, ' failed: ', err)
                 end
