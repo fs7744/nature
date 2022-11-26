@@ -89,3 +89,18 @@ location /t {
 GET /t
 --- error_log
 test
+
+=== plugin load same twice should init right
+--- config
+location /t {
+    content_by_lua_block {
+        local context = require("nature.core.context")
+        local ctx = context.new_api_context()
+        local plugin = require("nature.core.plugin")
+        plugin.load({'t.lua.plugin_init', 't.lua.plugin_init' })
+    }
+}
+--- request
+GET /t
+--- error_log
+destroy_true
