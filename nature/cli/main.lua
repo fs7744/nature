@@ -25,11 +25,13 @@ end
 local e = env(arg[1])
 
 local conf_params = {
-    name = "conf",
-    short_name = "c",
-    description = "output generate nginx.conf",
-    required = true,
-    default = e.home .. '/nginx.conf'
+    {
+        name = "conf",
+        short_name = "c",
+        description = "output generate nginx.conf",
+        required = true,
+        default = e.home .. '/nginx.conf'
+    }
 }
 
 local cmds = {
@@ -44,7 +46,54 @@ local cmds = {
         name = "init",
         description = "init conf",
         options = {
-
+            conf_params[1],
+            {
+                name = "mode",
+                short_name = "m",
+                description = "conf mode : yaml or etcd",
+                required = true,
+                default = 'yaml'
+            },
+            {
+                name = "file",
+                short_name = "f",
+                description = "yaml conf path",
+                required = false,
+                default = e.home .. 'nature.yaml'
+            },
+            {
+                name = "etcd_host",
+                description = "etcd host",
+                required = false,
+                default = 'http://127.0.0.1:2379'
+            },
+            {
+                name = "etcd_prefix",
+                description = "etcd prefix",
+                required = false,
+                default = '/nature'
+            },
+            {
+                name = "etcd_timeout",
+                description = "etcd timeout",
+                required = false,
+                default = 300
+            },
+            {
+                name = "etcd_user",
+                description = "etcd user",
+                required = false
+            },
+            {
+                name = "etcd_password",
+                description = "etcd password",
+                required = false
+            },
+            {
+                name = "etcd_ssl_verify",
+                description = "etcd ssl_verify",
+                required = false
+            },
         },
         fn = function(env, args)
             return require('nature.cli.conf').generate(env, args)
