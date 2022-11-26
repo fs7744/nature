@@ -8,7 +8,7 @@ run_tests();
 
 __DATA__
 
-=== env should can set and get
+=== redis should right
 --- config
 location /t {
     content_by_lua_block {

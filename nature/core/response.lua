@@ -28,7 +28,7 @@ if require('nature.core.ngp').is_http_system() then
 
     local function exit(code, content)
         local ctx = ngx.ctx.api_ctx
-        ctx._stop = true
+        ctx.stop = true
         if code ~= nil then
             ngx.status = code
         end
@@ -153,7 +153,7 @@ if require('nature.core.ngp').is_http_system() then
 else
     function _M.exit(code, content)
         local ctx = ngx.ctx.api_ctx
-        ctx._stop = true
+        ctx.stop = true
         if code ~= nil then
             ngx.status = code
         end
