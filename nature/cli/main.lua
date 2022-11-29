@@ -59,7 +59,7 @@ local cmds = {
                 short_name = "f",
                 description = "yaml conf path",
                 required = false,
-                default = e.home .. 'nature.yaml'
+                default = e.home .. '/nature.yaml'
             },
             {
                 name = "etcd_host",
@@ -93,6 +93,13 @@ local cmds = {
                 name = "etcd_ssl_verify",
                 description = "etcd ssl_verify",
                 required = false
+            },
+            {
+                name = "check_conf",
+                description = "check conf",
+                required = false,
+                default = true,
+                type = "boolean"
             },
         },
         fn = function(env, args)

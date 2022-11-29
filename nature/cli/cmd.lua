@@ -25,7 +25,7 @@ local function help(ops, showOptions, showHelp)
                 end
                 local default = ''
                 if not t.flag and t.default then
-                    default = ' (default: ' .. t.default .. ')'
+                    default = ' (default: ' .. tostring(t.default) .. ')'
                 end
                 print(str.r_pad('  --' .. t.name .. short_name, 18) ..
                     str.r_pad(option, 7) .. (t.description or "") ..
@@ -81,6 +81,15 @@ local function parse_args(args, cmd)
 
         if o.default and (not r[o.name] or r[o.name] == '#no_args#') then
             r[o.name] = o.default
+        end
+
+        if o.type and r[o.name] then
+            local t = o.type
+            local v = r[o.name]
+            if t == "boolean" then
+                v = tostring(v) == 'true'
+            end
+            r[o.name] = v
         end
 
         if o.required and not r[o.name] then
