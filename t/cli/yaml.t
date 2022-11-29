@@ -85,3 +85,60 @@ ok: 1
 ["env","env"]
 --- no_error_log
 [error]
+
+# === cli yaml generate user
+# --- config
+# location /t {
+#     content_by_lua_block {
+#        local os = require("nature.core.os")
+#        local f = require("nature.core.file")
+#        local fp = "$TEST_NGINX_HTML_DIR/user.yaml"
+#        local c = "$TEST_NGINX_HTML_DIR/user.conf"
+#        f.overwrite(fp, [=[
+# user: root
+# ]=])
+#        local v, err = os.exec_cmd('sh nature.sh init -m yaml -f '..fp..' -c '..c)
+#        if err then
+#         ngx.log(ngx.ERR, err)
+#        end
+#        ngx.print(v)
+#        ngx.print(f.read_all(c))
+#     }
+# }
+# --- request eval
+# ["GET /t","GET /t"]
+# --- response_body_like eval
+# ["syntax is ok","user root;"]
+# --- no_error_log
+# [error]
+
+=== cli yaml generate worker config
+--- config
+location /t {
+    content_by_lua_block {
+       local os = require("nature.core.os")
+       local f = require("nature.core.file")
+       local fp = "$TEST_NGINX_HTML_DIR/worker_config.yaml"
+       local c = "$TEST_NGINX_HTML_DIR/worker_config.conf"
+       f.overwrite(fp, [=[
+worker_rlimit_nofile: 1
+worker_rlimit_core: 12
+worker_shutdown_timeout: 10
+worker_processes: 2
+worker_cpu_affinity: 10
+worker_connections: 6
+]=])
+       local v, err = os.exec_cmd('sh nature.sh init -m yaml -f '..fp..' -c '..c)
+       if err then
+        ngx.log(ngx.ERR, err)
+       end
+       ngx.print(v)
+       ngx.print(f.read_all(c))
+    }
+}
+--- request eval
+["GET /t","GET /t","GET /t","GET /t","GET /t","GET /t","GET /t"]
+--- response_body_like eval
+["syntax is ok","worker_rlimit_nofile 1;","worker_rlimit_core 12;","worker_shutdown_timeout 10;","worker_processes 2;","worker_cpu_affinity 10;","worker_connections 6;"]
+--- no_error_log
+[error]
