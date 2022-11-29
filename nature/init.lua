@@ -32,6 +32,7 @@ function _M.init(params)
 end
 
 function _M.init_worker()
+    config.init_worker()
 end
 
 function _M.stream_preread()
