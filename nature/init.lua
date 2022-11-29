@@ -5,6 +5,7 @@ local context = require("nature.core.context")
 local balancer = require("nature.balancer")
 local plugin = require("nature.core.plugin")
 local l4 = require("nature.router.l4")
+local config = require("nature.config.manager")
 local get_api_context = context.get_api_context
 local new_api_context = context.new_api_context
 local clear_api_context = context.clear_api_context
@@ -24,6 +25,10 @@ function _M.init(params)
         log.error("failed to enable privileged_agent: ", err)
     end
     params = json.decode(params)
+    ok, err = pcall(config.init, params)
+    if not ok then
+        log.error("failed to init config: ", err)
+    end
 end
 
 function _M.init_worker()
@@ -41,11 +46,11 @@ function _M.stream_preread()
     end
     if matched_router then
         plugin_run("preread", ctx)
-        if not balancer_prepare(ctx) then
-            exit(503)
+        if not ctx.stop then
+            balancer_prepare(ctx)
         end
     else
-        exit(503)
+        exit(404)
     end
 end
 

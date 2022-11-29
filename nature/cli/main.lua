@@ -102,9 +102,7 @@ local cmds = {
                 type = "boolean"
             },
         },
-        fn = function(env, args)
-            return require('nature.cli.conf').generate(env, args)
-        end
+        fn = require('nature.cli.conf').generate
     },
     {
         name = "start",
