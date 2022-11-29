@@ -1,0 +1,15 @@
+worker_processes: 1
+enable_reuseport: true
+stream:
+  enable: true
+  access_log:
+    enable: true
+    format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time"
+router:
+  l4:
+    r1:
+      host:
+        - *
+      listen: 127.0.0.1:8980
+      type: tcp
+      ssl: false

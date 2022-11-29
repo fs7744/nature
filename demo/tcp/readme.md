@@ -1,0 +1,1 @@
+sh nature.sh init -m yaml -f ./demo/tcp/tcp.yaml -c ./demo/tcp/tcp.conf

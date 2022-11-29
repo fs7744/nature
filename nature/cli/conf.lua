@@ -53,12 +53,7 @@ stream {
     lua_socket_log_errors off;
     lua_code_cache on;
 
-    {% if max_pending_timers then %}
-    lua_max_pending_timers {* max_pending_timers *};
-    {% end %}
-    {% if max_running_timers then %}
-    lua_max_running_timers {* max_running_timers *};
-    {% end %}
+    lua_shared_dict stream_lrucache_lock 10m;
 
     {% if stream.config then %}
     {% for key, v in ipairs(stream.config) do %}
@@ -156,6 +151,7 @@ http {
     lua_socket_log_errors off;
     lua_code_cache on;
 
+    lua_shared_dict lrucache_lock 10m;
 
     server {
         listen unix:/tmp/events.sock;
