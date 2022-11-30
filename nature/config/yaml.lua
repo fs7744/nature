@@ -32,19 +32,21 @@ local function load_file()
         return nil, err
     end
     cache.conf = conf
-    cache.router = conf.router
-    cache.plugins = conf.plugins
-    cache.upstream = conf.upstream
-    conf.router = nil
-    conf.plugins = nil
-    conf.upstream = nil
-    conf.upstream = nil
-    if conf.config and type(conf.config) == "table" then
-        for key, value in pairs(conf.config) do
-            cache[key] = value
+    if conf then
+        cache.router = conf.router
+        cache.plugins = conf.plugins
+        cache.upstream = conf.upstream
+        conf.router = nil
+        conf.plugins = nil
+        conf.upstream = nil
+        conf.upstream = nil
+        if conf.config and type(conf.config) == "table" then
+            for key, value in pairs(conf.config) do
+                cache[key] = value
+            end
         end
+        conf.config = nil
     end
-    conf.config = nil
 end
 
 function _M.init(params)

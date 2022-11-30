@@ -14,3 +14,13 @@ router:
       listen: 127.0.0.1:8980
       type: tcp
       ssl: false
+      upstream: a
+upstream:
+  a:
+    type: static
+    nodes:
+      - host: a
+        port: 80
+        weight: 1
+  b:
+    type: dns
