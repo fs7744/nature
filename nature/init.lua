@@ -4,8 +4,11 @@ local json = require("nature.core.json")
 local context = require("nature.core.context")
 local balancer = require("nature.balancer")
 local plugin = require("nature.core.plugin")
+local router = require("nature.router")
 local l4 = require("nature.router.l4")
 local config = require("nature.config.manager")
+local events = require("nature.core.events")
+local upstream = require("nature.upstream")
 local get_api_context = context.get_api_context
 local new_api_context = context.new_api_context
 local clear_api_context = context.clear_api_context
@@ -29,11 +32,16 @@ function _M.init(params)
     if not ok then
         log.error("failed to init config: ", err)
     end
+    events.init()
+    plugin.init()
+    upstream.init()
+    router.init()
 end
 
 function _M.init_worker()
     require("nature.core.timers").init_worker()
     config.init_worker()
+    events.init_worker()
 end
 
 function _M.stream_preread()

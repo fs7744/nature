@@ -20,7 +20,10 @@ if not worker_connections then
 end    
 if not worker_processes then
     worker_processes = 'auto'
-end  
+end
+if not events_sock then
+    events_sock = 'unix:/tmp/events.sock'
+end
 %}
 error_log {* error_log *} {* error_log_level *};
 {% if user and user ~= '' then %}
@@ -154,7 +157,7 @@ http {
     lua_shared_dict lrucache_lock 10m;
 
     server {
-        listen unix:/tmp/events.sock;
+        listen {*events_sock*};
         location / {
             content_by_lua_block {
                 require('nature.core.events').run()

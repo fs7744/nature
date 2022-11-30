@@ -1,11 +1,14 @@
 local pkg_loaded = package.loaded
 local log = require("nature.core.log")
+local config = require("nature.config.manager")
+local events = require("nature.core.events")
+local is_http = require('nature.core.ngp').is_http_system()
 
 local plugin_method = {
     "rewrite", "access", "header_filter", "body_filter", "log", "preread", "ssl_certificate"
 }
 
-local _M = {}
+local _M = { global = {} }
 
 local plugins = {}
 
@@ -47,11 +50,11 @@ function _M.load(load_list, unload_load_list)
     end
 end
 
-function _M.run(fnName, ctx)
+local function run(fnList, fnName, ctx)
     if ctx.stop then
         return
     end
-    local fns = ctx.matched_router[fnName]
+    local fns = fnList[fnName]
     if fns then
         for _, pkg in ipairs(fns) do
             local pkg_name = pkg.name
@@ -74,8 +77,13 @@ function _M.run(fnName, ctx)
     end
 end
 
-function _M.run_without_stop(fnName, ctx)
-    local fns = ctx.matched_router[fnName]
+function _M.run(fnName, ctx)
+    run(_M.global, fnName, ctx)
+    run(ctx.matched_router, fnName, ctx)
+end
+
+local function run_without_stop(fnList, fnName, ctx)
+    local fns = fnList[fnName]
     if fns then
         for _, pkg in ipairs(ctx.matched_router[fnName]) do
             local pkg_name = pkg.name
@@ -92,6 +100,49 @@ function _M.run_without_stop(fnName, ctx)
                 end
             end
         end
+    end
+end
+
+function _M.run_without_stop(fnName, ctx)
+    run_without_stop(_M.global, fnName, ctx)
+    if ctx.matched_router then
+        run_without_stop(ctx.matched_router, fnName, ctx)
+    end
+end
+
+local function plugin_meta_change(data)
+    _M.load(data.load, data.unload)
+end
+
+local function global_plugins_change(data)
+    if not data then
+        data = {}
+    end
+    _M.global = {}
+end
+
+function _M.init()
+    local lplugins = config.get("plugins")
+    if lplugins then
+        local ps
+        local g
+        local source
+        if is_http then
+            ps = lplugins.http
+            g = "http_global_plugins"
+            source = 'http'
+        else
+            ps = lplugins.stream
+            source = 'stream'
+            g = "stream_global_plugins"
+        end
+        if ps then
+            _M.load(ps)
+        end
+
+        events.subscribe(source, 'plugin_meta_change', plugin_meta_change)
+        events.subscribe(g, 'config_change', global_plugins_change)
+        global_plugins_change(config.get(g))
     end
 end
 

@@ -1,5 +1,6 @@
 worker_processes: 1
 enable_reuseport: true
+events_sock: unix:/tmp/event.sock
 stream:
   enable: true
   access_log:
