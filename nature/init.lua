@@ -32,6 +32,7 @@ function _M.init(params)
 end
 
 function _M.init_worker()
+    require("nature.core.timers").init_worker()
     config.init_worker()
 end
 
