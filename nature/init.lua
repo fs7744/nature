@@ -8,7 +8,7 @@ local router = require("nature.router")
 local l4 = require("nature.router.l4")
 local config = require("nature.config.manager")
 local events = require("nature.core.events")
-local upstream = require("nature.upstream")
+local discovery = require("nature.discovery")
 local get_api_context = context.get_api_context
 local new_api_context = context.new_api_context
 local clear_api_context = context.clear_api_context
@@ -34,9 +34,8 @@ function _M.init(params)
     end
     events.init()
     plugin.init()
-    upstream.init()
+    discovery.init()
     router.init()
-    require("nature.core.dns").init()
 end
 
 function _M.init_worker()

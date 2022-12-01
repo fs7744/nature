@@ -1,17 +1,13 @@
 local log              = require("nature.core.log")
 local exit             = require("nature.core.response").exit
 local balancer         = require("ngx.balancer")
+local pick_server      = require("nature.discovery").pick_server
 local enable_keepalive = balancer.enable_keepalive and require('nature.core.ngp').is_http_system() -- need patch
 
 local _M = {}
 
 function _M.prepare(ctx)
-    local server, err
-    -- local up_key = ctx.upstream_key
-    -- if not up_key then
-    --     log.error("failed to pick server: ", 'no upstream')
-    --     return exit(404)
-    -- end
+    local server, err = pick_server(ctx)
     if not server then
         log.error("failed to pick server: ", err)
         return exit(404)

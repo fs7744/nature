@@ -24,7 +24,7 @@ router:
       upstream: a
 upstream:
   a:
-    type: static
+    type: dns
     nodes:
       - host: www.google.com
         port: 80
