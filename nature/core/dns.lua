@@ -1,5 +1,6 @@
 local dns_utils = require("resty.dns.utils")
 local table = require("nature.core.table")
+local config = require("nature.config.manager")
 
 local HOSTS_IP_MATCH_CACHE = {}
 
@@ -63,9 +64,11 @@ local function resolve_srv(client, answers)
     return resolved_answers
 end
 
-function _M.resolve(self, domain, selector)
-    local client = self.client
-
+local client
+local function resolve(domain, selector)
+    if not client then
+        return nil, "no config dns server"
+    end
     -- this function will dereference the CNAME records
     local answers, err = client.resolve(domain)
     if not answers then
@@ -96,7 +99,9 @@ function _M.resolve(self, domain, selector)
     return nil, "unsupport DNS answer"
 end
 
-function _M.init(args)
+_M.resolve = resolve
+
+function _M.init()
     --  initialize /etc/hosts
     local hosts, err = dns_utils.parseHosts()
     if not hosts then
@@ -104,13 +109,18 @@ function _M.init(args)
     end
     HOSTS_IP_MATCH_CACHE = hosts
 
-    package.loaded["resty.dns.client"] = nil
-    local dns = require("resty.dns.client")
-    local ok, err = dns.init(args)
-    if not ok then
-        return nil, "failed to init the dns client: " .. err
+    local c = config.get('conf')
+    local dns_config = c and c.dns or nil
+    if dns_config then
+        package.loaded["resty.dns.client"] = nil
+        local dns = require("resty.dns.client")
+
+        local ok, err = dns.init(dns_config)
+        if not ok then
+            return nil, "failed to init the dns client: " .. err
+        end
+        client = dns
     end
-    _M.client = dns
 end
 
 function _M.parse_domain(host)
@@ -125,7 +135,7 @@ function _M.parse_domain(host)
             return ip
         end
     end
-    local ip_info, err = _M:resolve(host)
+    local ip_info, err = resolve(host)
     if not ip_info then
         return nil, err
     end

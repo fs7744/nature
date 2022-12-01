@@ -1,11 +1,20 @@
 worker_processes: 1
 enable_reuseport: true
 events_sock: unix:/tmp/event.sock
+dns:
+  enable_ipv6: false
+  timeout: 5000
+  validTtl: 60000
+  retrans: 5
+  nameservers:
+    - 10.16.42.7
+    - 10.16.73.7
+    - 10.16.83.7
 stream:
   enable: true
   access_log:
     enable: true
-    format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time"
+    format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time $hostname $server_addr"
 router:
   l4:
     r1:
@@ -19,8 +28,6 @@ upstream:
   a:
     type: static
     nodes:
-      - host: a
+      - host: www.google.com
         port: 80
         weight: 1
-  b:
-    type: dns

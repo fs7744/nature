@@ -11,9 +11,10 @@ function _M.init_router_metadata(r)
     }
 end
 
+local router
 local match_opts = {}
 function _M.match_router(ctx)
-    local r = _M.router
+    local r = router
     if r then
         local metadata, err = r:match(ctx.var.server_port, match_opts)
         if err then
@@ -21,6 +22,14 @@ function _M.match_router(ctx)
         end
         return metadata
     end
+end
+
+function _M.set_router(r)
+    router = r
+end
+
+function _M.get_router()
+    return router
 end
 
 return _M

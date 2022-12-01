@@ -9,7 +9,7 @@ local _M = {}
 
 
 local function update(routers, m, unload)
-    local old_router = m.router
+    local old_router = m.get_router()
     local old = tb.new(32, 0)
     for key, value in pairs(unload or {}) do
         if m.current[key] then
@@ -29,7 +29,7 @@ local function update(routers, m, unload)
     for _, rc in pairs(m.current) do
         table.insert(rs, rc)
     end
-    m.router = radix.new(rs)
+    m.set_router(radix.new(rs))
     tb.clear(old)
     if old_router then
         old_router:free()

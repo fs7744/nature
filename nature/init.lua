@@ -1,4 +1,4 @@
-require("nature.core.patch").patch()
+require("nature.core.patch")
 local log = require("nature.core.log")
 local json = require("nature.core.json")
 local context = require("nature.core.context")
@@ -36,6 +36,7 @@ function _M.init(params)
     plugin.init()
     upstream.init()
     router.init()
+    require("nature.core.dns").init()
 end
 
 function _M.init_worker()
