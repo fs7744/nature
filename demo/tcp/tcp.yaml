@@ -7,9 +7,7 @@ dns:
   validTtl: 60000
   retrans: 5
   nameservers:
-    - 10.16.42.7
-    - 10.16.73.7
-    - 10.16.83.7
+    - 6.6.6.6
 stream:
   enable: true
   access_log:
