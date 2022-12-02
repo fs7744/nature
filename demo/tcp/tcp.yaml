@@ -3,11 +3,13 @@ enable_reuseport: true
 events_sock: unix:/tmp/event.sock
 dns:
   enable_ipv6: false
-  timeout: 5000
+  timeout: 500
   validTtl: 60000
-  retrans: 5
+  retrans: 1
   nameservers:
     - 6.6.6.6
+discovery:
+  - dns
 stream:
   enable: true
   access_log:
