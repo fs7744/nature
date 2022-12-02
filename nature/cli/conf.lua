@@ -24,6 +24,11 @@ end
 if not events_sock then
     events_sock = 'unix:/tmp/events.sock'
 end
+client_body_temp_path = '/tmp/client_body_temp'
+fastcgi_temp_path = '/tmp/fastcgi_temp'
+scgi_temp_path = '/tmp/scgi_temp'
+uwsgi_temp_path = '/tmp/uwsgi_temp'
+proxy_temp_path = '/tmp/proxy_temp'
 %}
 error_log {* error_log *} {* error_log_level *};
 {% if user and user ~= '' then %}
@@ -154,7 +159,33 @@ http {
     lua_socket_log_errors off;
     lua_code_cache on;
 
+    {% if http and http.enable then %}
+    {%
+        if http.client_body_temp_path then
+            client_body_temp_path = http.client_body_temp_path
+        end
+        if http.fastcgi_temp_path then
+            fastcgi_temp_path = http.fastcgi_temp_path
+        end
+        if http.scgi_temp_path then
+            scgi_temp_path = http.scgi_temp_path
+        end
+        if http.uwsgi_temp_path then
+            uwsgi_temp_path = http.uwsgi_temp_path
+        end
+        if http.proxy_temp_path then
+            proxy_temp_path = http.proxy_temp_path
+        end
+    %}
     lua_shared_dict lrucache_lock 10m;
+
+    {% end %}
+
+    client_body_temp_path {* client_body_temp_path *};
+    fastcgi_temp_path {* fastcgi_temp_path *};
+    scgi_temp_path {* scgi_temp_path *};
+    uwsgi_temp_path {* uwsgi_temp_path *};
+    proxy_temp_path {* proxy_temp_path *};
 
     server {
         listen {*events_sock*};

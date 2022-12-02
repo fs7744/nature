@@ -50,7 +50,7 @@ function _M.load(load_list, unload_load_list)
     end
 end
 
-local function run(fnList, fnName, ctx)
+local function run(fnList, fnName, ctx, matched_router)
     if ctx.stop then
         return
     end
@@ -62,7 +62,7 @@ local function run(fnList, fnName, ctx)
             if p then
                 p = p[fnName]
                 if p then
-                    local r, err = pcall(p, ctx, pkg)
+                    local r, err = pcall(p, ctx, pkg, matched_router)
                     if not r then
                         log.error(fnName, ' exec ', pkg_name, ' failed: ', err)
                     end
@@ -77,21 +77,24 @@ local function run(fnList, fnName, ctx)
     end
 end
 
-function _M.run(fnName, ctx)
-    run(_M.global, fnName, ctx)
-    run(ctx.matched_router, fnName, ctx)
+function _M.run(fnName, ctx, matched_router)
+    if not matched_router then
+        matched_router = ctx.matched_router
+    end
+    run(_M.global, fnName, ctx, matched_router)
+    run(matched_router, fnName, ctx, matched_router)
 end
 
-local function run_without_stop(fnList, fnName, ctx)
+local function run_without_stop(fnList, fnName, ctx, matched_router)
     local fns = fnList[fnName]
     if fns then
-        for _, pkg in ipairs(ctx.matched_router[fnName]) do
+        for _, pkg in ipairs(matched_router[fnName]) do
             local pkg_name = pkg.name
             local p = plugins[pkg_name]
             if p then
                 p = p[fnName]
                 if p then
-                    local r, err = pcall(p, ctx, pkg)
+                    local r, err = pcall(p, ctx, pkg, matched_router)
                     if not r then
                         log.error(fnName, ' exec ', pkg_name, ' failed: ', err)
                     end
@@ -103,10 +106,13 @@ local function run_without_stop(fnList, fnName, ctx)
     end
 end
 
-function _M.run_without_stop(fnName, ctx)
-    run_without_stop(_M.global, fnName, ctx)
-    if ctx.matched_router then
-        run_without_stop(ctx.matched_router, fnName, ctx)
+function _M.run_without_stop(fnName, ctx, matched_router)
+    if not matched_router then
+        matched_router = ctx.matched_router
+    end
+    run_without_stop(_M.global, fnName, ctx, matched_router)
+    if matched_router then
+        run_without_stop(matched_router, fnName, ctx, matched_router)
     end
 end
 

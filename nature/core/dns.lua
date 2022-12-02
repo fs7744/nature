@@ -123,23 +123,29 @@ function _M.init()
     end
 end
 
-function _M.parse_domain(host)
+function _M.parse_domain(host, selector)
     local rev = HOSTS_IP_MATCH_CACHE[host]
+    local ip
     if rev then
         -- use ipv4 in high priority
-        local ip = rev["ipv4"]
+        ip = rev["ipv4"]
         if not ip then
             ip = rev["ipv6"]
         end
-        if ip then
+        if ip and selector ~= _M.RETURN_ALL then
             return ip
         end
     end
-    local ip_info, err = resolve(host)
+    local ip_info, err = resolve(host, selector)
     if not ip_info then
         return nil, err
     end
-    if ip_info.address then
+    if selector == _M.RETURN_ALL then
+        if ip then
+            table.insert(ip_info, { address = ip })
+        end
+        return ip_info
+    elseif ip_info.address then
         return ip_info.address
     end
 

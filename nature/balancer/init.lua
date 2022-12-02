@@ -1,20 +1,21 @@
-local log              = require("nature.core.log")
-local exit             = require("nature.core.response").exit
-local balancer         = require("ngx.balancer")
-local pick_server      = require("nature.discovery").pick_server
-local enable_keepalive = balancer.enable_keepalive and require('nature.core.ngp').is_http_system() -- need patch
+local log                       = require("nature.core.log")
+local exit                      = require("nature.core.response").exit
+local balancer                  = require("ngx.balancer")
+local pick_server               = require("nature.discovery").pick_server
+local enable_keepalive          = balancer.enable_keepalive and require('nature.core.ngp').is_http_system() -- need patch
+local balancer_set_current_peer = balancer.set_current_peer
 
 local _M = {}
 
-function _M.prepare(ctx)
+function _M.prepare(ctx, matched_router)
+    ctx.upstream_key = matched_router.upstream
     local server, err = pick_server(ctx)
     if not server then
         log.error("failed to pick server: ", err)
         return exit(404)
     end
 
-    ctx.picked_server = server
-
+    ctx.first_server = server
 end
 
 local global_keepalive = {
@@ -44,12 +45,31 @@ do
         --     return balancer.enable_keepalive(keepalive.timeout, keepalive.requests)
         -- end
 
-        return balancer.set_current_peer(server.host, server.port)
+        return balancer_set_current_peer(server.host, server.port)
     end
 end
 
 function _M.run(ctx)
-    set_current_peer(ctx.picked_server)
+    local server, err
+    server = ctx.first_server
+    if server then
+        ctx.first_server = nil
+        --set_balancer_opts(ctx.router_conf)
+    else
+        -- report_failure(ctx, ctx.proxy_server)
+        server, err = pick_server(ctx)
+        if not server then
+            log.error("failed to pick server: ", err)
+            return exit(502)
+        end
+    end
+    ctx.proxy_server = server
+    local ok
+    ok, err = set_current_peer(server)
+    if not ok then
+        log.error("failed to set the current peer: ", err)
+        return exit(502)
+    end
 end
 
 return _M

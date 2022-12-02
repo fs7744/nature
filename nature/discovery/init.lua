@@ -17,12 +17,13 @@ function _M.init()
     local conf = config.get('conf')
     conf = conf and conf.discovery or nil
     if conf then
-        for k, v in pairs(conf) do
+        for _, k in pairs(conf) do
             local ok, p = pcall(require, "nature.discovery." .. k)
             if ok then
+                p.upstreams = upstreams
                 local init = p['init']
                 if init then
-                    init(v)
+                    init()
                 end
                 local up_change = p['upstream_change']
                 if up_change then
@@ -34,25 +35,34 @@ function _M.init()
         end
         events.subscribe('*', 'upstream_change', upstream_change)
     end
-
 end
 
 function _M.init_worker()
     local conf = config.get('conf')
     conf = conf and conf.discovery or nil
     if conf then
-        for k, v in pairs(conf) do
+        for _, k in ipairs(conf) do
             local ok, p = pcall(require, "nature.discovery." .. k)
             if ok then
                 local init = p['init_worker']
                 if init then
-                    init(v)
+                    init()
                 end
             else
                 log.error('load discovery ', k, ' failed: ', p)
             end
         end
     end
+    ngx.timer.at(0, function()
+        local upstream = config.get('upstream')
+        if upstream then
+            for key, value in pairs(upstream) do
+                value.key = key
+                upstream_change(value)
+            end
+        end
+    end)
+
 end
 
 function _M.pick_server(ctx)
@@ -65,7 +75,7 @@ function _M.pick_server(ctx)
             return nil, 'no upstream'
         end
     end
-    return up.pick_server(ctx)
+    return up.pick(ctx)
 end
 
 return _M

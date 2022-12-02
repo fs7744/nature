@@ -42,6 +42,7 @@ function _M.init_worker()
     require("nature.core.timers").init_worker()
     config.init_worker()
     events.init_worker()
+    discovery.init_worker()
 end
 
 function _M.stream_preread()
@@ -55,9 +56,9 @@ function _M.stream_preread()
         ctx.matched_router = matched_router
     end
     if matched_router then
-        plugin_run("preread", ctx)
+        plugin_run("preread", ctx, matched_router)
         if not ctx.stop then
-            balancer_prepare(ctx)
+            balancer_prepare(ctx, matched_router)
         end
     else
         exit(404)
