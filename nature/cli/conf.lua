@@ -62,6 +62,7 @@ stream {
     lua_code_cache on;
 
     lua_shared_dict stream_lrucache_lock 10m;
+    lua_shared_dict stream_process_events 50m;
 
     {% if stream.config then %}
     {% for key, v in ipairs(stream.config) do %}

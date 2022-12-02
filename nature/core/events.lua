@@ -3,39 +3,84 @@ local log = require("nature.core.log")
 
 local _M = {}
 
-local ev
-function _M.init()
-    local params = config.get('params')
-    local opts = {
-        listening = params.events_sock,
-    }
-    ev = require("resty.events").new(opts)
-    if not ev then
-        log.error("failed to init events")
+if require("nature.core.ngp").is_http_system() then
+
+    local ev
+    local function init()
+        local params = config.get('params')
+        local opts = {
+            listening = params.events_sock,
+        }
+        ev = require("resty.events").new(opts)
+        if not ev then
+            log.error("failed to init events")
+        end
     end
-end
 
-function _M.init_worker()
-    local ok, err = ev:init_worker()
-    if not ok then
-        ngx.log(ngx.ERR, "failed to init events: ", err)
+    _M.init = init
+
+    local function init_worker()
+        local ok, err = ev:init_worker()
+        if not ok then
+            ngx.log(ngx.ERR, "failed to init events: ", err)
+        end
     end
-end
 
-function _M.run()
-    ev:run()
-end
+    _M.init_worker = init_worker
 
-function _M.publish_all(source, event, data)
-    ev:publish('all', source, event, data)
-end
+    function _M.run()
+        ev:run()
+    end
 
-function _M.publish_local(source, event, data)
-    ev:publish('current', source, event, data)
-end
+    local function publish_all(source, event, data)
+        ev:publish('all', source, event, data)
+    end
 
-function _M.subscribe(source, event, handler)
-    ev:subscribe(source, event, handler)
-end
+    _M.publish_all = publish_all
 
+    local function publish_local(source, event, data)
+        ev:publish('current', source, event, data)
+    end
+
+    _M.publish_local = publish_local
+
+    local function subscribe(source, event, handler)
+        ev:subscribe(source, event, handler)
+    end
+
+    _M.subscribe = subscribe
+
+else
+    local ev = require("resty.worker.events")
+
+    _M.init = function()
+
+    end
+    local function init_worker()
+        local ok, err = ev.configure({ interval = 0.5, shm = "stream_process_events" })
+        if not ok then
+            log.error("failed to init events", err)
+        end
+    end
+
+    _M.init_worker = init_worker
+
+    local function publish_all(source, event, data)
+        ev.post(source, event, data)
+    end
+
+    _M.publish_all = publish_all
+
+    local function publish_local(source, event, data)
+        ev.post_local(source, event, data)
+    end
+
+    _M.publish_local = publish_local
+
+    local function subscribe(source, event, handler)
+        ev.register(handler, source, event)
+    end
+
+    _M.subscribe = subscribe
+end
 return _M

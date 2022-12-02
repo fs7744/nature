@@ -7,7 +7,9 @@ dns:
   validTtl: 60000
   retrans: 1
   nameservers:
-    - 6.6.6.6
+    - 10.16.73.7
+    - 10.16.83.7
+    - 10.16.42.7
 discovery:
   - dns
 plugins:
@@ -33,6 +35,6 @@ upstream:
   a:
     type: dns
     nodes:
-      - host: www.google.com
+      - host: edge.newegg.lt
         port: 80
         weight: 1

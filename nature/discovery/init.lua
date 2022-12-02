@@ -1,16 +1,14 @@
-local log = require("nature.core.log")
+local log    = require("nature.core.log")
 local events = require("nature.core.events")
 local config = require("nature.config.manager")
+local lb     = require("nature.balancer.lb")
 
 local _M = {}
 
 local upstreams = {}
 
 local function upstream_change(data)
-    local func = _M[data.type]
-    if func then
-        func(data)
-    end
+    upstreams[data.key] = data.nodes and lb.create(data.nodes, data.lb) or nil
 end
 
 function _M.init()
@@ -20,24 +18,19 @@ function _M.init()
         for _, k in pairs(conf) do
             local ok, p = pcall(require, "nature.discovery." .. k)
             if ok then
-                p.upstreams = upstreams
                 local init = p['init']
                 if init then
                     init()
-                end
-                local up_change = p['upstream_change']
-                if up_change then
-                    _M[k] = up_change
                 end
             else
                 log.error('load discovery ', k, ' failed: ', p)
             end
         end
-        events.subscribe('*', 'upstream_change', upstream_change)
     end
 end
 
 function _M.init_worker()
+    events.subscribe('upstream', 'upstream_change', upstream_change)
     local conf = config.get('conf')
     conf = conf and conf.discovery or nil
     if conf then
@@ -53,15 +46,6 @@ function _M.init_worker()
             end
         end
     end
-    ngx.timer.at(0, function()
-        local upstream = config.get('upstream')
-        if upstream then
-            for key, value in pairs(upstream) do
-                value.key = key
-                upstream_change(value)
-            end
-        end
-    end)
 
 end
 
