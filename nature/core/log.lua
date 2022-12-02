@@ -9,7 +9,7 @@ local ngx_errlog = require("ngx.errlog")
 
 local _M = {}
 
-local cur_level = ngx.WARN
+local cur_level = ngx_errlog.get_sys_filter_level()
 
 local do_nothing = function()
 end

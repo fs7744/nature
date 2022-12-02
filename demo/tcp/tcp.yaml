@@ -1,6 +1,7 @@
 worker_processes: 1
 enable_reuseport: true
 events_sock: unix:/tmp/event.sock
+error_log_level: info
 dns:
   enable_ipv6: false
   timeout: 500
