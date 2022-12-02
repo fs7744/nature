@@ -10,6 +10,9 @@ dns:
     - 6.6.6.6
 discovery:
   - dns
+plugins:
+  stream:
+    - nature.plugins.single_upstream
 stream:
   enable: true
   access_log:
@@ -24,6 +27,8 @@ router:
       type: tcp
       ssl: false
       upstream: a
+      preread:
+        - name: nature.plugins.single_upstream
 upstream:
   a:
     type: dns
