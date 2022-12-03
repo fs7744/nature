@@ -102,4 +102,12 @@ function _M.pick_server(ctx)
     return up.pick(ctx)
 end
 
+function _M.after_balance(ctx)
+    local up = ctx.picker
+    up = up and up.after_balance or nil
+    if up then
+        up(ctx)
+    end
+end
+
 return _M
