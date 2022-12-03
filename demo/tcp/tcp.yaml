@@ -35,7 +35,7 @@ router:
         - name: nature.plugins.single_upstream
 upstream:
   a:
-    lb: ewma
+    lb: chash
     nodes:
       - host: edge.newegg.lt
         port: 80

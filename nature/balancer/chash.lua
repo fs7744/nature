@@ -19,7 +19,7 @@ return function(nodes)
             else
                 local chash_key = ctx._chash_key
                 if not chash_key then
-                    return nil, 'no chash key'
+                    chash_key = ctx.var.remote_addr
                 end
                 local id
                 id, last_server_index = picker:find(chash_key)
