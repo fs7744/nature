@@ -20,8 +20,7 @@ local function get(node, nodes)
         log.error('dns query failed: ', node.host, ' ', err)
     elseif ns then
         for _, n in ipairs(ns) do
-            local nw = { host = n.address, port = node.port, weight = node.weight, hostname = node.host }
-            table.insert(nodes, nw)
+            table.insert(nodes, { host = n.address, port = node.port, weight = node.weight, hostname = node.host })
         end
     end
 end
