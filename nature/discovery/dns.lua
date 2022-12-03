@@ -4,6 +4,7 @@ local log     = require("nature.core.log")
 local ngp     = require("nature.core.ngp")
 local config  = require("nature.config.manager")
 local events  = require("nature.core.events")
+local utils   = require("nature.core.utils")
 local ngx_now = ngx.now
 
 local _M = {}
@@ -12,38 +13,55 @@ function _M.init()
     dns.init()
 end
 
-local function upstream_change(data)
-    local expire = data._expire
+local function get(node, nodes)
+    log.info('query dns: ', node.host)
+    local ns, err = dns.parse_domain(node.host, dns.RETURN_ALL)
+    if err then
+        log.error('dns query failed: ', node.host, ' ', err)
+    elseif ns then
+        for _, n in ipairs(ns) do
+            local nw = { host = n.address, port = node.port, weight = node.weight, hostname = node.host }
+            table.insert(nodes, nw)
+        end
+    end
+end
+
+_M.get = get
+
+local function compare_nodes(value)
+    local expire = value._expire
     if expire and expire >= ngx_now() then
         return
     end
 
-    data._expire = ngx_now() + (data.expire or 60)
-    local nodes = {}
-    for _, node in ipairs(data.nodes) do
-        log.info('query dns: ', node.host)
-        local ns, err = dns.parse_domain(node.host, dns.RETURN_ALL)
-        if ns then
-            for _, n in ipairs(ns) do
-                table.insert(nodes,
-                    { host = n.address, port = node.port, weight = node.weight, hostname = node.host,
-                        pool = n.address .. ':' .. node.port .. '#' .. node.host })
-            end
-        else
-            log.error('dns query failed: ', node.host, ' ', err)
+    value._expire = ngx_now() + (value.dns_expire or 60)
+    log.info('upstream_meta dns compare_nodes: ', value.key)
+    local old_dns = value.old_dns
+    local new_dns = {}
+    for _, node in ipairs(value.nodes) do
+        if node.discovery == 'dns' then
+            get(node, new_dns)
         end
     end
-    events.publish_all('upstream', 'upstream_change',
-        { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes })
+    if old_dns then
+        if not utils.compare_node(old_dns, new_dns) then
+            events.publish_local('upstream_meta', 'upstream_meta_change', value)
+        end
+    else
+
+        value.old_dns = new_dns
+    end
+
 end
 
 function _M.check()
     local upstream = config.get('upstream')
     if upstream then
         for key, value in pairs(upstream) do
-            if value.type == 'dns' then
-                value.key = key
-                upstream_change(value)
+            value.key = key
+            local ok, err = pcall(compare_nodes, value)
+            if not ok then
+                log.error('dns compare upstream ', key, ' failed: ', err)
             end
         end
     end
@@ -54,9 +72,6 @@ function _M.init_worker()
         return
     end
     timers.register_timer('dns_upstream_check', _M.check, true)
-    ngx.timer.at(0, function()
-        _M.check()
-    end)
 end
 
 return _M

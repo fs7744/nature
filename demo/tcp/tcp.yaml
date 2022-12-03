@@ -13,6 +13,7 @@ dns:
     - 10.16.42.7
 discovery:
   - dns
+  - static
 plugins:
   stream:
     - nature.plugins.single_upstream
@@ -34,8 +35,8 @@ router:
         - name: nature.plugins.single_upstream
 upstream:
   a:
-    type: dns
     nodes:
       - host: edge.newegg.lt
         port: 80
         weight: 1
+        discovery: dns
