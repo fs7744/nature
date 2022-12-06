@@ -19,8 +19,8 @@ local function crate_healthcheck(picker, length, upstream_key)
         end
         return nil, 'no health node'
     end
-    picker.report_failure = function(server, code)
-        report_failure(upstream_key, server.pool, code)
+    picker.report_failure = function(server)
+        report_failure(upstream_key, server.pool)
     end
 end
 

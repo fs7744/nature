@@ -162,6 +162,13 @@ else
             ngx_exit(code)
         end
     end
+
+    local str_sub = string.sub
+    local function get_upstream_status(ctx)
+        return tonumber(str_sub(ctx.var.status or "", -3))
+    end
+
+    _M.get_upstream_status = get_upstream_status
 end
 
 

@@ -1,5 +1,6 @@
 local log                       = require("nature.core.log")
 local exit                      = require("nature.core.response").exit
+local get_upstream_status       = require("nature.core.response").get_upstream_status
 local balancer                  = require("ngx.balancer")
 local get_last_failure          = balancer.get_last_failure
 local pick_server               = require("nature.discovery").pick_server
@@ -70,7 +71,25 @@ function _M.prepare(ctx, matched_router)
     ctx.first_server = server
 end
 
-local function after_balance(ctx)
+local function report_failure(ctx)
+    local server = ctx.proxy_server
+    if not server then
+        return
+    end
+    local up = ctx.picker
+    if not up then
+        return
+    end
+    local rf = up.report_failure
+    if rf then
+        local state, _ = get_last_failure()
+        if state == "failed" then
+            rf(server)
+        end
+    end
+end
+
+function _M.after_balance(ctx)
     local server = ctx.proxy_server
     if not server then
         return
@@ -83,16 +102,14 @@ local function after_balance(ctx)
     if ab then
         ab(ctx)
     end
-    local report_failure = up.report_failure
-    if report_failure then
-        local state, code = get_last_failure()
-        if state == "failed" then
-            report_failure(server, code)
+    local rf = up.report_failure
+    if rf then
+        local status = get_upstream_status(ctx)
+        if status == 502 or status == 504 then
+            rf(server)
         end
     end
 end
-
-_M.after_balance = after_balance
 
 function _M.run(ctx)
     local server, matched_router, err
@@ -102,7 +119,7 @@ function _M.run(ctx)
         ctx.first_server = nil
         set_balancer_opts(matched_router)
     else
-        after_balance(ctx)
+        report_failure(ctx)
         server, err = pick_server(ctx)
         if not server then
             log.error("failed to pick server: ", err)

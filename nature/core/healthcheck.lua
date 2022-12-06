@@ -10,13 +10,20 @@ shm_healthcheck = ngx.shared[require('nature.core.ngp').sys_prefix() .. "healthc
 
 local _M = {}
 
-function _M.report_failure(id, pool, code)
-    events.publish_all('healthcheck', 'node_status_change', { id = id, pool = pool, code = code })
-end
-
 function _M.get_status(id, pool)
     local status = shm_healthcheck:get(id .. '#' .. pool)
     return status == nil
+end
+
+function _M.report_failure(id, pool)
+    local unhealthy_count, err = shm_healthcheck:incr(id .. '#' .. pool .. '#count', 1, 10)
+    if err then
+        log.warn("failed to incr unhealthy_key: ", id, '#', pool, '#count',
+            " err: ", err)
+    end
+    if unhealthy_count < 20 then
+        events.publish_all('healthcheck', 'node_status_change', { id = id, pool = pool, status = 'unhealthy' })
+    end
 end
 
 local function node_status_changed(data)
@@ -35,26 +42,26 @@ local function node_status_changed(data)
     local pool = data.pool
     local p = status[pool]
     if healthcheck.is_passive then
-        if not healthcheck.unhealth_expire then
-            healthcheck.unhealth_expire = 30
+        if not healthcheck.unhealthy_expire then
+            healthcheck.unhealthy_expire = 30
         end
-        if not healthcheck.unhealth_failed then
-            healthcheck.unhealth_failed = 3
+        if not healthcheck.unhealthy_failed then
+            healthcheck.unhealthy_failed = 3
         end
         if not p then
-            p = { failed = 1, expire = ngx_now() + healthcheck.unhealth_expire }
+            p = { failed = 1, expire = ngx_now() + healthcheck.unhealthy_expire }
             status[pool] = p
         elseif p.expire < ngx_now() then
             p.failed = 1
-            p.expire = ngx_now() + healthcheck.unhealth_expire
+            p.expire = ngx_now() + healthcheck.unhealthy_expire
         else
             p.failed = p.failed + 1
         end
 
-        if p.failed >= healthcheck.unhealth_failed then
+        if p.failed >= healthcheck.unhealthy_failed then
             log.warn(key, ' ', pool, ' unhealthy')
-            shm_healthcheck:set(key .. '#' .. pool, 'unhealthy', healthcheck.unhealth_expire)
-            p.expire = ngx_now() + healthcheck.unhealth_expire
+            shm_healthcheck:set(key .. '#' .. pool, 'unhealthy', healthcheck.unhealthy_expire)
+            p.expire = ngx_now() + healthcheck.unhealthy_expire
         end
     end
 end

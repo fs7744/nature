@@ -9,14 +9,8 @@ local math_max = math.max
 local math_exp = math.exp
 local math_random = math.random
 local decay_time = 10
-local shm_ewma, shm_last_touched_at
-if require("nature.core.ngp").is_http_system() then
-    shm_ewma = ngx.shared["balancer-ewma"]
-    shm_last_touched_at = ngx.shared["balancer-ewma-last-touched-at"]
-else
-    shm_ewma = ngx.shared["stream_balancer-ewma"]
-    shm_last_touched_at = ngx.shared["stream_balancer-ewma-last-touched-at"]
-end
+local shm_ewma = ngx.shared[require('nature.core.ngp').sys_prefix() .. "balancer-ewma"]
+local shm_last_touched_at = ngx.shared[require('nature.core.ngp').sys_prefix() .. "balancer-ewma-last-touched-at"]
 
 local function decay_ewma(ewma, last_touched_at, rtt, now)
     local td = now - last_touched_at

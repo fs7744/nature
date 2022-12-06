@@ -30,7 +30,6 @@ router:
       listen: 127.0.0.1:8980
       type: tcp
       ssl: false
-      retries: 1
       upstream: a
       preread:
         - name: nature.plugins.single_upstream
