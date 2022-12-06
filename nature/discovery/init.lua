@@ -10,8 +10,9 @@ local _M = {}
 local upstreams = {}
 
 local function upstream_change(data)
-    local old = upstreams[data.key]
-    upstreams[data.key] = data.nodes and lb.create(data.nodes, data.lb) or nil
+    local key = data.key
+    local old = upstreams[key]
+    upstreams[key] = data.nodes and lb.create(data.nodes, data.lb, data.has_healthcheck, key) or nil
     if old and old.destroy then
         old.destroy()
     end
@@ -32,7 +33,7 @@ local function build_upstream(data)
     end
     log.info('build_upstream ', data.key, ' nodes: ', json.delay_encode(nodes))
     events.publish_all('upstream', 'upstream_change',
-        { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes })
+        { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes, has_healthcheck = data.healthcheck ~= nil })
 end
 
 function _M.init()
@@ -55,6 +56,7 @@ function _M.init()
 end
 
 function _M.init_worker()
+    require("nature.core.healthcheck").init_worker()
     events.subscribe('upstream', 'upstream_change', upstream_change)
     local conf = config.get('conf')
     conf = conf and conf.discovery or nil
@@ -100,14 +102,6 @@ function _M.pick_server(ctx)
         end
     end
     return up.pick(ctx)
-end
-
-function _M.after_balance(ctx)
-    local up = ctx.picker
-    up = up and up.after_balance or nil
-    if up then
-        up(ctx)
-    end
 end
 
 return _M

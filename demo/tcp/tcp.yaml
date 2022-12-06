@@ -30,12 +30,13 @@ router:
       listen: 127.0.0.1:8980
       type: tcp
       ssl: false
+      retries: 1
       upstream: a
       preread:
         - name: nature.plugins.single_upstream
 upstream:
   a:
-    lb: chash
+    lb: roundrobin
     nodes:
       - host: edge.newegg.lt
         port: 80
@@ -45,3 +46,5 @@ upstream:
         port: 820
         weight: 1
         discovery: static
+    healthcheck:
+      is_passive: true

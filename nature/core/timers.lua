@@ -90,7 +90,7 @@ local function background_timer()
 
     local threads = {}
     for name, timer in pairs(timers) do
-        log.info("run timer[", name, "]")
+        log.debug("run timer[", name, "]")
 
         local th, err = thread_spawn(timer)
         if not th then

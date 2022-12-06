@@ -42,6 +42,9 @@ end
 if not balancer_ewma_last_touched_at_size then
     balancer_ewma_last_touched_at_size = '10m'
 end
+if not healthcheck_size then
+    healthcheck_size = '20m'
+end
 %}
 error_log {* error_log *} {* error_log_level *};
 {% if user and user ~= '' then %}
@@ -74,6 +77,7 @@ stream {
     lua_socket_log_errors off;
     lua_code_cache on;
 
+    lua_shared_dict stream_healthcheck {*healthcheck_size*};
     lua_shared_dict stream_lrucache_lock {*lrucache_lock_size*};
     lua_shared_dict stream_process_events {*process_events_size*};
     lua_shared_dict stream_balancer-ewma {*balancer_ewma_size*};

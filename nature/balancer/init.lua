@@ -1,6 +1,7 @@
 local log                       = require("nature.core.log")
 local exit                      = require("nature.core.response").exit
 local balancer                  = require("ngx.balancer")
+local get_last_failure          = balancer.get_last_failure
 local pick_server               = require("nature.discovery").pick_server
 local enable_keepalive          = require('nature.core.ngp').is_http_system() and balancer.enable_keepalive or nil -- need patch
 local balancer_set_current_peer = balancer.set_current_peer
@@ -69,6 +70,30 @@ function _M.prepare(ctx, matched_router)
     ctx.first_server = server
 end
 
+local function after_balance(ctx)
+    local server = ctx.proxy_server
+    if not server then
+        return
+    end
+    local up = ctx.picker
+    if not up then
+        return
+    end
+    local ab = up.after_balance
+    if ab then
+        ab(ctx)
+    end
+    local report_failure = up.report_failure
+    if report_failure then
+        local state, code = get_last_failure()
+        if state == "failed" then
+            report_failure(server, code)
+        end
+    end
+end
+
+_M.after_balance = after_balance
+
 function _M.run(ctx)
     local server, matched_router, err
     server = ctx.first_server
@@ -77,7 +102,7 @@ function _M.run(ctx)
         ctx.first_server = nil
         set_balancer_opts(matched_router)
     else
-        -- report_failure(ctx)
+        after_balance(ctx)
         server, err = pick_server(ctx)
         if not server then
             log.error("failed to pick server: ", err)
