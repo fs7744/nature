@@ -76,9 +76,11 @@ local function report_failure(key, node, unhealthy_failed, expire)
     end
     if node._unhealthy_expire < ngx_now() then
         node._failed = 1
+        node._unhealthy_expire = ngx_now() + expire
     else
         node._failed = (node._failed or 0) + 1
     end
+    log.debug(key, ' ', node.pool, ' unhealthy (', node._failed, '/', unhealthy_failed, ')')
     if node._failed >= unhealthy_failed then
         log.warn(key, ' ', node.pool, ' unhealthy')
         shm_healthcheck:set(key .. '#' .. node.pool, 'unhealthy', 0)
@@ -91,9 +93,11 @@ local function report_success(key, node, healthy_success, expire)
     end
     if node._healthy_expire < ngx_now() then
         node._success = 1
+        node._healthy_expire = ngx_now() + expire
     else
         node._success = (node._success or 0) + 1
     end
+    log.debug(key, ' ', node.pool, ' healthy (', node._success, '/', healthy_success, ')')
     if node._success >= healthy_success then
         log.warn(key, ' ', node.pool, ' healthy')
         shm_healthcheck:delete(key .. '#' .. node.pool)
@@ -102,13 +106,16 @@ end
 
 local function do_active_check(key, healthcheck, node)
     if not healthcheck.period then
-        healthcheck.period = 10
+        healthcheck.period = 5
     end
     if not healthcheck.timeout then
         healthcheck.timeout = 1
     end
     if not healthcheck.unhealthy_failed then
         healthcheck.unhealthy_failed = 3
+    end
+    if not healthcheck.healthy_success then
+        healthcheck.healthy_success = 3
     end
     if not healthcheck.unhealthy_expire then
         healthcheck.unhealthy_expire = 30
@@ -124,13 +131,10 @@ local function do_active_check(key, healthcheck, node)
         healthcheck.healthy_http_status = { 200, 302 }
     end
     local expire = node._active_expire
-    if not expire then
-        expire = ngx_now() + healthcheck.period
-        node._active_expire = expire
-    end
-    if expire >= ngx_now() then
+    if expire and expire >= ngx_now() then
         return
     end
+    node._active_expire = ngx_now() + healthcheck.period
 
     local sock, err = ngx.socket.tcp()
     if not sock then
@@ -186,7 +190,7 @@ local function do_active_check(key, healthcheck, node)
         host = "Host: " .. (node.hostname or node.host) .. "\r\n"
     end
     local request = "GET " .. (healthcheck.path or '/') .. " HTTP/1.0\r\n" .. host ..
-        (healthcheck.header or '') .. "%s\r\n"
+        (healthcheck.header or '') .. "\r\n"
     log.debug("request head: ", request)
     local bytes
     bytes, err = sock:send(request)
@@ -253,6 +257,10 @@ function _M.active_check()
             end
         end
     end
+end
+
+function _M.add_active_target(key, nodes)
+    active_checks[key] = nodes
 end
 
 local function node_status_change(data)

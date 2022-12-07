@@ -47,3 +47,8 @@ upstream:
         discovery: static
     healthcheck:
       is_passive: true
+      type: http
+      path: /faq
+      #header: "Host: edge.newegg.lt\r\n"
+      match_body: faq
+

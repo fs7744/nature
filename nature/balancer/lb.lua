@@ -4,7 +4,7 @@ local report_failure = hc.report_failure
 
 local _M = {}
 
-local function crate_healthcheck(picker, length, upstream_key)
+local function crate_healthcheck(picker, length, upstream_key, is_passive)
     local pick = picker.pick
     picker.pick = function(ctx)
         local server, err
@@ -19,12 +19,14 @@ local function crate_healthcheck(picker, length, upstream_key)
         end
         return nil, 'no health node'
     end
-    picker.report_failure = function(server)
-        report_failure(upstream_key, server.pool)
+    if is_passive then
+        picker.report_failure = function(server)
+            report_failure(upstream_key, server.pool)
+        end
     end
 end
 
-function _M.create(nodes, lb, has_healthcheck, upstream_key)
+function _M.create(nodes, lb, has_healthcheck, is_passive, upstream_key)
     local length = #nodes
     if length == 0 then
         return nil
@@ -37,7 +39,7 @@ function _M.create(nodes, lb, has_healthcheck, upstream_key)
     end
     local picker = require('nature.balancer.' .. lb)(nodes)
     if has_healthcheck then
-        crate_healthcheck(picker, length, upstream_key)
+        crate_healthcheck(picker, length, upstream_key, is_passive)
     end
     return picker
 end

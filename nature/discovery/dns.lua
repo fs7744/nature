@@ -47,7 +47,6 @@ local function compare_nodes(value)
             events.publish_local('upstream_meta', 'upstream_meta_change', value)
         end
     else
-
         value.old_dns = new_dns
     end
 
