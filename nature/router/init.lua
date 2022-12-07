@@ -3,7 +3,7 @@ local config = require("nature.config.manager")
 local tb = require('nature.core.table')
 local l4 = require("nature.router.l4")
 local events = require("nature.core.events")
---local l7 = require("nature.router.l7")
+local l7 = require("nature.router.l7")
 
 local _M = {}
 
@@ -39,7 +39,10 @@ end
 function _M.init()
     local routers = config.get('router')
     if require('nature.core.ngp').is_http_system() then
-        --update(routers.l7, l7)
+        update(routers.l7, l7)
+        events.subscribe('http', 'router_l7_change', function(data)
+            update(data.load, l7, data.unload)
+        end)
     else
         update(routers.l4, l4)
         events.subscribe('stream', 'router_l4_change', function(data)

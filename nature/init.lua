@@ -6,6 +6,7 @@ local balancer                = require("nature.balancer")
 local plugin                  = require("nature.core.plugin")
 local router                  = require("nature.router")
 local l4                      = require("nature.router.l4")
+local l7                      = require("nature.router.l7")
 local config                  = require("nature.config.manager")
 local events                  = require("nature.core.events")
 local discovery               = require("nature.discovery")
@@ -19,6 +20,7 @@ local balancer_run            = balancer.run
 local plugin_run              = plugin.run
 local plugin_run_without_stop = plugin.run_without_stop
 local l4_match_router         = l4.match_router
+local l7_match_router         = l7.match_router
 
 local _M = { version = '0.1' }
 
@@ -68,6 +70,34 @@ end
 
 function _M.balancer()
     balancer_run(get_api_context())
+end
+
+function _M.access()
+    local ctx = new_api_context()
+    local matched_router = ctx.matched_router
+    ctx.matched_router = l7_match_router(ctx)
+    if matched_router then
+        plugin_run("access", ctx, matched_router)
+        if not ctx.stop then
+            balancer_prepare(ctx, matched_router)
+        end
+    else
+        exit(404)
+    end
+end
+
+function _M.header_filter()
+    local ctx = get_api_context()
+    if ctx then
+        plugin_run_without_stop("header_filter", ctx)
+    end
+end
+
+function _M.body_filter()
+    local ctx = get_api_context()
+    if ctx then
+        plugin_run_without_stop("body_filter", ctx)
+    end
 end
 
 function _M.log()
