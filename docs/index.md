@@ -1,3 +1,15 @@
+# 目录
+
+## 知识预备篇
+
+* 概念介绍
+    - [gateway 是什么？](prepare/gateway.md)
+    - [反向代理是什么？](prepare/reverse_proxy.md)
+    - [网络概念]()
+    - [网络协议]()
+* [lua语言介绍]()
+* [openresty介绍]()
+
 # 文档概述
 
 本文档目的为介绍如何基于 openresty 构建现代api gateway
@@ -24,14 +36,3 @@
 |- Makefile         项目构建等基本的命令
 |- nature.sh        项目命令行入口示例
 ```
-# 目录
-
-## 知识预备篇
-
-* 概念介绍
-    - [gateway 是什么？](prepare/gateway.md)
-    - [反向代理是什么？]()
-    - [网络概念]()
-    - [网络协议]()
-* [lua语言介绍]()
-* [openresty介绍]()
