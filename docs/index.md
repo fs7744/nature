@@ -6,9 +6,11 @@
     - [gateway 是什么？](prepare/gateway.md)
     - [反向代理是什么？](prepare/reverse_proxy.md)
     - [网络概念](prepare/network.md)
-    - [网络协议]()
+    - [网络协议](prepare/protocol.md)
+* [扯一扯技术选型](prepare/choose.md)
 * [lua语言介绍]()
-* [openresty介绍]()
+* [luarocks介绍](prepare/luarocks.md)
+* [openresty介绍](prepare/openresty.md)
 
 # 文档概述
 
