@@ -1,4 +1,4 @@
-# 5. 了解openresty
+# openresty介绍
 
 openresty 最好的教程大概就是这份了：[OpenResty 最佳实践](https://github.com/moonbingbing/openresty-best-practices/blob/master/SUMMARY.md)
 

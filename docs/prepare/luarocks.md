@@ -1,4 +1,4 @@
-# luarocks
+# luarocks介绍
 
 ## luarocks 是什么？
 
