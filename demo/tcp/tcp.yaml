@@ -8,9 +8,9 @@ dns:
   validTtl: 60000
   retrans: 1
   nameservers:
-    - 10.16.73.7
-    - 10.16.83.7
-    - 10.16.42.7
+    - 10.15.73.7
+    - 10.15.83.7
+    - 10.15.42.7
 discovery:
   - dns
   - static
@@ -46,7 +46,7 @@ router:
   l7:
     r2:
       host:
-        - edge.newegg.lt
+        - edge.nature.lt
       paths:
         - *
       upstream: a
@@ -65,11 +65,11 @@ upstream:
   a:
     lb: roundrobin
     nodes:
-      - host: edge.newegg.lt
+      - host: edge.nature.lt
         port: 80
         weight: 1
         discovery: dns
-      - host: 172.16.150.156
+      - host: 172.15.150.156
         port: 820
         weight: 1
         discovery: static
@@ -77,6 +77,6 @@ upstream:
       is_passive: true
       type: http
       path: /faq
-      #header: "Host: edge.newegg.lt\r\n"
+      #header: "Host: edge.nature.lt\r\n"
       match_body: faq
 
