@@ -78,10 +78,10 @@ API网关方式的核心要点是，所有的客户端和消费端都通过统�
 
 其作用可以用网友的这幅图理解
 
-![apigateway](/img/apigateway.png)
+![apigateway](../img/apigateway.png)
 
 在 CNCF 的 [API Gateway landscape](https://landscape.cncf.io/card-mode?category=api-gateway\&grouping=category\&sort=contributors) 中有接近 20 个 API 网关的选型（不包括公有云厂商的产品），包括 Apache APISIX、Kong、Tyk 等等。很多网关都称自己是下一代 API 网关，是最受欢迎的开源 API 网关项目。
 
-![cncf](/img/cncf.png)
+![cncf](../img/cncf.png)
 
 这些网关都有一些相似的理念，和自己独特的理解。
