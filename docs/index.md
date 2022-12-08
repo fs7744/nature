@@ -5,7 +5,7 @@
 * 概念介绍
     - [gateway 是什么？](prepare/gateway.md)
     - [反向代理是什么？](prepare/reverse_proxy.md)
-    - [网络概念]()
+    - [网络概念](prepare/network.md)
     - [网络协议]()
 * [lua语言介绍]()
 * [openresty介绍]()
