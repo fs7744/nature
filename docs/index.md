@@ -8,10 +8,11 @@
     - [网络概念](prepare/network.md)
     - [网络协议](prepare/protocol.md)
 * [扯一扯技术选型](prepare/choose.md)
-* [lua语言介绍]()
-* [luarocks介绍](prepare/luarocks.md)
-* [openresty介绍](prepare/openresty.md)
-
+* lua语言
+    - [luarocks介绍](prepare/luarocks.md)
+* openresty
+    - [openresty介绍](prepare/openresty.md)
+ 
 # 文档概述
 
 本文档目的为介绍如何基于 openresty 构建现代api gateway
