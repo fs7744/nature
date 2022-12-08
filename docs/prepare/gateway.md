@@ -24,7 +24,7 @@
 
 在it技术领域，网关最初是一种硬件设备的代名词，时至今日，在购物网站上搜索“网关”依然可以看见大量硬件设备
 
-![hardware](/img/hardware.png)
+![hardware](../img/hardware.png)
 
 其中路由器就是大家接触最多的网关设备，这些设备通常主要负责数据转发的角色。
 
@@ -78,10 +78,10 @@ API网关方式的核心要点是，所有的客户端和消费端都通过统�
 
 其作用可以用网友的这幅图理解
 
-![hardware](/img/apigateway.png)
+![apigateway](/img/apigateway.png)
 
 在 CNCF 的 [API Gateway landscape](https://landscape.cncf.io/card-mode?category=api-gateway\&grouping=category\&sort=contributors) 中有接近 20 个 API 网关的选型（不包括公有云厂商的产品），包括 Apache APISIX、Kong、Tyk 等等。很多网关都称自己是下一代 API 网关，是最受欢迎的开源 API 网关项目。
 
-![hardware](/img/cncf.png)
+![cncf](/img/cncf.png)
 
 这些网关都有一些相似的理念，和自己独特的理解。
