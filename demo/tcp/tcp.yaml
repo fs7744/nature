@@ -19,6 +19,7 @@ plugins:
     - nature.plugins.single_upstream
   http:
     - nature.plugins.single_upstream
+    - nature.plugins.waf
 stream:
   enable: true
   access_log:
@@ -51,6 +52,15 @@ router:
       upstream: a
       access:
         - name: nature.plugins.single_upstream
+        - name: nature.plugins.waf
+          waf:
+            rules:
+              - java.lang
+              - .(htaccess|bash_history)
+            vars:
+              - uri
+              - http_user_agent
+              - http_cookie
 upstream:
   a:
     lb: roundrobin

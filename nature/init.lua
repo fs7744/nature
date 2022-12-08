@@ -80,6 +80,16 @@ function _M.access()
         ctx.matched_router = matched_router
         plugin_run("access", ctx, matched_router)
         if not ctx.stop then
+            local vars = ctx.var
+            if vars.upstream_uri == '' then
+                vars.upstream_uri = vars.request_uri
+            end
+            if vars.upstream_scheme == '' then
+                vars.upstream_scheme = 'http'
+            end
+            if not vars.proxy_host then
+                vars.proxy_host = vars.http_host
+            end
             balancer_prepare(ctx, matched_router)
         end
     else
