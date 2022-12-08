@@ -103,7 +103,7 @@ function _M.pick_server(ctx)
         up = up and upstreams[up] or nil
         ctx.picker = up
         if not up then
-            return nil, 'no upstream'
+            return nil, 'no upstream: ' .. (ctx.upstream_key or '')
         end
     end
     return up.pick(ctx)

@@ -17,6 +17,8 @@ discovery:
 plugins:
   stream:
     - nature.plugins.single_upstream
+  http:
+    - nature.plugins.single_upstream
 stream:
   enable: true
   access_log:
@@ -26,7 +28,7 @@ http:
   enable: true
   access_log:
     enable: true
-    format: "$remote_addr [$time_local] $status $bytes_sent"
+    format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
   listens:
     - listen: 127.0.0.1:8981
 router:
@@ -39,6 +41,15 @@ router:
       ssl: false
       upstream: a
       preread:
+        - name: nature.plugins.single_upstream
+  l7:
+    r2:
+      host:
+        - edge.newegg.lt
+      paths:
+        - *
+      upstream: a
+      access:
         - name: nature.plugins.single_upstream
 upstream:
   a:

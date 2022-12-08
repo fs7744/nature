@@ -75,8 +75,9 @@ end
 function _M.access()
     local ctx = new_api_context()
     local matched_router = ctx.matched_router
-    ctx.matched_router = l7_match_router(ctx)
+    matched_router = l7_match_router(ctx)
     if matched_router then
+        ctx.matched_router = matched_router
         plugin_run("access", ctx, matched_router)
         if not ctx.stop then
             balancer_prepare(ctx, matched_router)
