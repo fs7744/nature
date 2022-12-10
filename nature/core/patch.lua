@@ -5,7 +5,6 @@ require("jit.opt").start("minstitch=2", "maxtrace=4000", "maxrecord=8000",
     "sizemcode=64", "maxmcode=4000", "maxirconst=1000")
 
 local get_phase = ngx.get_phase
-local ngx_socket = ngx.socket
 local original_tcp = ngx.socket.tcp
 local socket = require("socket")
 local unix_socket = require("socket.unix")
