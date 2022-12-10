@@ -1,37 +1,41 @@
-worker_processes: 1
-enable_reuseport: true
-events_sock: unix:/tmp/event.sock
-error_log_level: info
-dns:
-  enable_ipv6: false
-  timeout: 500
-  validTtl: 60000
-  retrans: 1
-  nameservers:
-    - 10.15.73.7
-    - 10.15.83.7
-    - 10.15.42.7
-discovery:
-  - dns
-  - static
-plugins:
+conf:
+  worker_processes: 1
+  enable_reuseport: true
+  events_sock: unix:/tmp/event.sock
+  error_log_level: info
+  dns:
+    enable_ipv6: false
+    timeout: 500
+    validTtl: 60000
+    retrans: 1
+    nameservers:
+      - 10.15.73.7
+      - 10.15.83.7
+      - 10.15.42.7
+  discovery:
+    - dns
+    - static
   stream:
-    - nature.plugins.single_upstream
+    enable: true
+    access_log:
+      enable: true
+      format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time $hostname $server_addr"
+  http:
+    enable: true
+    access_log:
+      enable: true
+      format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
+    listens:
+      - listen: 127.0.0.1:8981
+plugins:
+  nature.plugins.single_upstream:
+    source: 
+      - http
+      - stream
+      - 
   http:
     - nature.plugins.single_upstream
     - nature.plugins.waf
-stream:
-  enable: true
-  access_log:
-    enable: true
-    format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time $hostname $server_addr"
-http:
-  enable: true
-  access_log:
-    enable: true
-    format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
-  listens:
-    - listen: 127.0.0.1:8981
 router:
   l4:
     r1:

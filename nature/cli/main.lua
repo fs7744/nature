@@ -92,13 +92,16 @@ local cmds = {
             {
                 name = "etcd_ssl_verify",
                 description = "etcd ssl_verify",
-                required = false
+                required = false,
+                default = false,
+                type = "boolean",
             },
             {
                 name = "etcd_use_grpc",
                 description = "etcd use_grpc",
                 required = false,
-                default = true,
+                type = "boolean",
+                default = false,
             },
             {
                 name = "check_conf",

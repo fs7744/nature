@@ -39,7 +39,6 @@ local function load_file()
         conf.router = nil
         conf.plugins = nil
         conf.upstream = nil
-        conf.upstream = nil
         if conf.config and type(conf.config) == "table" then
             for key, value in pairs(conf.config) do
                 cache[key] = value
