@@ -151,7 +151,7 @@ local http_mt = { __index = http }
 http.new = function(_)
     local phase = get_phase()
     local sock, err
-    if phase ~= "init" and phase ~= "init_worker" then
+    if phase ~= "init" then
         sock, err = original_tcp()
     else
         sock, err = luasocket_tcp()
