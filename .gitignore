@@ -44,3 +44,5 @@ tmp/
 sync/
 
 t/servroot/
+
+demo/tcp/tcp.conf

@@ -95,6 +95,12 @@ local cmds = {
                 required = false
             },
             {
+                name = "etcd_use_grpc",
+                description = "etcd use_grpc",
+                required = false,
+                default = true,
+            },
+            {
                 name = "check_conf",
                 description = "check conf",
                 required = false,
