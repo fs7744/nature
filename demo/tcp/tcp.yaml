@@ -1,70 +1,72 @@
-conf:
-  worker_processes: 1
-  enable_reuseport: true
-  events_sock: unix:/tmp/event.sock
-  error_log_level: info
-  dns:
-    enable_ipv6: false
-    timeout: 500
-    validTtl: 60000
-    retrans: 1
-    nameservers:
-      - 10.15.73.7
-      - 10.15.83.7
-      - 10.15.42.7
-  discovery:
-    - dns
-    - static
-  stream:
-    enable: true
-    access_log:
+system:
+  conf:
+    worker_processes: 1
+    enable_reuseport: true
+    events_sock: unix:/tmp/event.sock
+    error_log_level: info
+    dns:
+      enable_ipv6: false
+      timeout: 500
+      validTtl: 60000
+      retrans: 1
+      nameservers:
+        - 10.15.73.7
+        - 10.15.83.7
+        - 10.15.42.7
+    discovery:
+      - dns
+      - static
+    stream:
       enable: true
-      format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time $hostname $server_addr"
-  http:
-    enable: true
-    access_log:
+      access_log:
+        enable: true
+        format: "$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time $hostname $server_addr"
+    http:
       enable: true
-      format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
-    listens:
-      - listen: 127.0.0.1:8981
+      access_log:
+        enable: true
+        format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
+      listens:
+        - listen: 127.0.0.1:8981
+
 plugins:
-  nature.plugins.single_upstream:
-    source: 
-      - http
-      - stream
-      - 
-  http:
+  stream_load:
+    - nature.plugins.single_upstream
+    - nature.plugins.demo
+  stream_global:
+    - name: nature.plugins.demo
+  http_load:
     - nature.plugins.single_upstream
     - nature.plugins.waf
-router:
-  l4:
-    r1:
-      host:
-        - *
-      listen: 127.0.0.1:8980
-      type: tcp
-      ssl: false
-      upstream: a
-      preread:
-        - name: nature.plugins.single_upstream
-  l7:
-    r2:
-      host:
-        - edge.nature.lt
-      paths:
-        - *
-      upstream: a
-      access:
-        - name: nature.plugins.single_upstream
-        - name: nature.plugins.waf
-          waf:
-            rules:
-              - java.lang
-              - .(htaccess|bash_history)
-            vars:
-              - uri
-              - http_user_agent
-              - http_cookie
+  http_global:
+    - name: nature.plugins.waf
+      waf:
+        rules:
+          - java.lang
+          - .(htaccess|bash_history)
+        vars:
+          - uri
+          - http_user_agent
+          - http_cookie
+router_l4:
+  r1:
+    host:
+      - *
+    listen: 127.0.0.1:8980
+    type: tcp
+    ssl: false
+    upstream: a
+    preread:
+      - name: nature.plugins.single_upstream
+router_l7:
+  r2:
+    host:
+      - edge.nature.lt
+    paths:
+      - *
+    upstream: a
+    access:
+      - name: nature.plugins.single_upstream
 upstream:
   a:
     lb: roundrobin
@@ -83,4 +85,6 @@ upstream:
       path: /faq
       #header: "Host: edge.nature.lt\r\n"
       match_body: faq
-
+config:
+  a:
+    test: 'demo'

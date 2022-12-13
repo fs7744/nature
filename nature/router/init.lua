@@ -37,15 +37,17 @@ local function update(routers, m, unload)
 end
 
 function _M.init()
-    local routers = config.get('router')
     if require('nature.core.ngp').is_http_system() then
-        update(routers.l7, l7)
-        events.subscribe('http', 'router_l7_change', function(data)
+
+        local routers = config.get('router_l7')
+        update(routers, l7)
+        events.subscribe('router_l4', 'config_change', function(data)
             update(data.load, l7, data.unload)
         end)
     else
-        update(routers.l4, l4)
-        events.subscribe('stream', 'router_l4_change', function(data)
+        local routers = config.get('router_l4')
+        update(routers, l4)
+        events.subscribe('router_l7', 'config_change', function(data)
             update(data.load, l4, data.unload)
         end)
     end

@@ -2,11 +2,6 @@ local pkg_loaded = package.loaded
 local log = require("nature.core.log")
 local config = require("nature.config.manager")
 local events = require("nature.core.events")
-local is_http = require('nature.core.ngp').is_http_system()
-
-local plugin_method = {
-    "rewrite", "access", "header_filter", "body_filter", "log", "preread", "ssl_certificate"
-}
 
 local _M = { global = {} }
 
@@ -21,31 +16,32 @@ local function unload_plugin(plugin, name)
     end
 end
 
-function _M.load(load_list, unload_load_list)
-    if unload_load_list then
-        for _, pkg_name in ipairs(unload_load_list) do
-            plugins[pkg_name] = nil
-            unload_plugin(pkg_loaded[pkg_name], pkg_name)
+function _M.load(load_list)
+    local loaded_hash = {}
+    for _, pkg_name in ipairs(load_list) do
+        local old = pkg_loaded[pkg_name]
+        local ok, plugin = pcall(require, pkg_name)
+        if ok then
+            loaded_hash[pkg_name] = true
+            plugins[pkg_name] = plugin
+            unload_plugin(old, pkg_name)
+            if plugin and plugin.init then
+                local o, err = pcall(plugin.init)
+                if not o then
+                    log.error('init plugin [', pkg_name, '] err:', err)
+                end
+            end
+            log.info('load plugin [', pkg_name, ']')
+        else
+            log.error('load plugin [', pkg_name, '] err:', plugin)
+            return
         end
     end
-    if load_list then
-        for _, pkg_name in ipairs(load_list) do
-            local old = pkg_loaded[pkg_name]
-            local ok, plugin = pcall(require, pkg_name)
-            if ok then
-                plugins[pkg_name] = plugin
-                unload_plugin(old, pkg_name)
-                if plugin and plugin.init then
-                    local o, err = pcall(plugin.init)
-                    if not o then
-                        log.error('init plugin [', pkg_name, '] err:', err)
-                    end
-                end
-                log.info('load plugin [', pkg_name, ']')
-            else
-                log.error('load plugin [', pkg_name, '] err:', plugin)
-                return
-            end
+
+    for pkg_name, v in pairs(plugins) do
+        if loaded_hash[pkg_name] ~= true then
+            plugins[pkg_name] = nil
+            unload_plugin(v, pkg_name)
         end
     end
 end
@@ -116,40 +112,28 @@ function _M.run_without_stop(fnName, ctx, matched_router)
     end
 end
 
-local function plugin_meta_change(data)
-    _M.load(data.load, data.unload)
+local function load_plugins_change(data)
+    if data then
+        _M.load(data)
+    end
 end
 
 local function global_plugins_change(data)
     if not data then
         data = {}
     end
-    _M.global = {}
+    _M.global = data
 end
 
 function _M.init()
-    local lplugins = config.get("plugins")
-    if lplugins then
-        local ps
-        local g
-        local source
-        if is_http then
-            ps = lplugins.http
-            g = "http_global_plugins"
-            source = 'http'
-        else
-            ps = lplugins.stream
-            source = 'stream'
-            g = "stream_global_plugins"
-        end
-        if ps then
-            _M.load(ps)
-        end
-
-        events.subscribe(source, 'plugin_meta_change', plugin_meta_change)
-        events.subscribe(g, 'config_change', global_plugins_change)
-        global_plugins_change(config.get(g))
-    end
+    local prefix = require('nature.core.ngp').sys_prefix()
+    local ps = config.get('plugins')
+    local load_key = prefix .. '_load'
+    load_plugins_change(ps[load_key])
+    local global_ps_key = prefix .. '_global'
+    global_plugins_change(ps[global_ps_key])
+    events.subscribe(load_key, 'plugins_change', load_plugins_change)
+    events.subscribe(global_ps_key, 'plugins_change', global_plugins_change)
 end
 
 return _M

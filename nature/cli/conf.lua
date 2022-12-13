@@ -1,5 +1,6 @@
 local cmd = require("nature.cli.cmd")
 local file = require("nature.core.file")
+local json = require("nature.core.json")
 
 local tpl = [=[
 {% if envs then %}
@@ -124,8 +125,8 @@ stream {
     }
 
     server {
-        {% if router and router.l4 then %}
-        {% for k, i in pairs(router.l4) do %}
+        {% if router_l4 then %}
+        {% for k, i in pairs(router_l4) do %}
         {% if i and i.listen then %}
         listen {* i.listen *} {% if i.ssl then %} ssl {% end %} {% if i.type == 'udp' then %} udp {% end %} {% if enable_reuseport then %} reuseport {% end %};
         {% end %}    
@@ -333,8 +334,41 @@ http {
 local _M = {}
 
 local function covnert_conf(env, args)
-    local conf, err = require('nature.cli.conf_' .. args.mode).read_conf(env, args)
-    return conf, err
+    local params
+    if args.mode == 'etcd' then
+        params = {
+            mode = args.mode,
+            http_host = args.etcd_host,
+            protocol = "v3",
+            api_prefix = "/v3",
+            key_prefix = args.etcd_prefix,
+            timeout = args.etcd_timeout,
+            user = args.etcd_user,
+            password = args.etcd_password,
+            ssl_verify = args.etcd_ssl_verify,
+            use_grpc = args.etcd_use_grpc,
+            ssl_cert_path = args.ssl_cert_path,
+            ssl_key_path = args.ssl_key_path,
+            conf = args.conf,
+            check_conf = args.check_conf,
+            home = env.home,
+        }
+    else
+        params = {
+            mode = args.mode,
+            file = args.file,
+            conf = args.conf,
+            check_conf = args.check_conf,
+            home = env.home,
+        }
+    end
+    local config = require('nature.config.manager')
+    config.init(params)
+    local conf = config.get('system', 'conf')
+    params.events_sock = conf.events_sock
+    conf.init_params = json.encode(params)
+    conf.router_l4 = config.get('router_l4')
+    return conf
 end
 
 function _M.generate(env, args)

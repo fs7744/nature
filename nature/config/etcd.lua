@@ -8,19 +8,25 @@ local re_gsub = str.re_gsub
 
 local _M = {}
 
-local cache = { etcd_version = 0, router = { l7 = {}, l4 = {} } }
+local cache = { etcd_version = 0 }
 local etcd
-local plugins_prefix
-local router_prefix
-local upstream_prefix
-local config_prefix
 
 local function init_prefix(params)
-    local key_prefix = params.key_prefix
-    plugins_prefix = key_prefix .. '_plugins'
-    router_prefix = key_prefix .. '_router'
-    upstream_prefix = key_prefix .. '_upstream'
-    config_prefix = key_prefix .. '_config'
+    _M['config'] = function(key, data)
+        events.publish_all(key, 'config_change', data)
+    end
+    _M['router_l7'] = function(key, data)
+        events.publish_all(key, 'router_l7_change', data)
+    end
+    _M['upstream'] = function(key, data)
+        events.publish_all(key, 'upstream_change', data)
+    end
+    _M['system'] = function(key, data)
+        -- restart
+    end
+    _M['router_l4'] = function(key, data)
+        -- restart
+    end
 end
 
 local function update_etcd_version(res)
@@ -52,7 +58,6 @@ function _M.get_all_config()
     log.info("get etcd all config data.")
     update_etcd_version_body(res)
     if res.body.kvs then
-        --log.error(json.delay_encode(res.body.kvs))
         for _, kv in ipairs(res.body.kvs) do
             local ks = str.split(kv.key, '/', nil, nil, 3)
             log.error(json.delay_encode(ks))
@@ -76,7 +81,12 @@ function _M.init(params)
     return _M
 end
 
+local function config_change(data, event, source)
+    cache[source] = data
+end
+
 function _M.init_worker()
+    events.subscribe('*', 'config_change', config_change)
     if not ngp.is_privileged_agent() then
         return
     end

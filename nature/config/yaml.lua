@@ -23,37 +23,22 @@ function _M.read_conf(conf_path)
     return conf, nil
 end
 
-local cache = {}
+local cache
 local yaml_change_time
 
-local function load_file()
-    local conf, err = _M.read_conf(cache.params.file)
+local function load_file(params)
+    local conf, err = _M.read_conf(params.file)
     if err then
         return nil, err
     end
-    cache.conf = conf
-    if conf then
-        cache.router = conf.router
-        cache.plugins = conf.plugins
-        cache.upstream = conf.upstream
-        conf.router = nil
-        conf.plugins = nil
-        conf.upstream = nil
-        if conf.config and type(conf.config) == "table" then
-            for key, value in pairs(conf.config) do
-                cache[key] = value
-            end
-        end
-        conf.config = nil
-    end
+    cache = conf or {}
 end
 
 function _M.init(params)
-    cache.params = params
     local attributes, err = lfs.attributes(params.file)
     yaml_change_time = attributes.change
 
-    load_file()
+    load_file(params)
     return _M
 end
 
@@ -80,8 +65,13 @@ function _M.init_worker()
     timers.register_timer('watch_yaml', watch_yaml, true)
 end
 
-function _M.get(key)
-    return cache[key]
+function _M.get(key, subkey)
+    local r = cache[key]
+    if subkey ~= nil and r ~= nil then
+        return r[subkey]
+    else
+        return r
+    end
 end
 
 return _M
