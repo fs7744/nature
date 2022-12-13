@@ -36,7 +36,7 @@ local function build_upstream_meta(data)
     local is_passive = data.healthcheck ~= nil and data.healthcheck.is_passive == true
     healthcheck.add_active_target(data.key,
         not is_passive and nodes or nil)
-    events.publish_all('upstream', 'upstream_meta_change',
+    events.publish_all('upstream_meta', data.key,
         { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes,
             has_healthcheck = data.healthcheck ~= nil, is_passive = is_passive })
 end
@@ -61,7 +61,7 @@ end
 
 function _M.init_worker()
     require("nature.core.healthcheck").init_worker()
-    events.subscribe('upstream', 'upstream_meta_change', upstream_change)
+    events.subscribe('upstream_meta', '*', upstream_change)
     local conf = config.get('system', 'discovery')
     if conf then
         for _, k in ipairs(conf) do
@@ -79,7 +79,7 @@ function _M.init_worker()
     if not ngp.is_privileged_agent() then
         return
     end
-    events.subscribe('*', 'upstream_change', build_upstream_meta)
+    events.subscribe('upstream', '*', build_upstream_meta)
     ngx.timer.at(0, function()
         local upstream = config.get('upstream')
         if upstream then

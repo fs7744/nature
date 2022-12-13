@@ -133,8 +133,8 @@ function _M.init()
     load_plugins_change(ps[load_key])
     local global_ps_key = prefix .. 'global'
     global_plugins_change(ps[global_ps_key])
-    events.subscribe(load_key, 'plugins_change', load_plugins_change)
-    events.subscribe(global_ps_key, 'plugins_change', global_plugins_change)
+    events.subscribe('plugins', load_key, load_plugins_change)
+    events.subscribe('plugins', global_ps_key, global_plugins_change)
 end
 
 return _M
