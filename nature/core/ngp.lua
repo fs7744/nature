@@ -31,7 +31,7 @@ function _M.is_http_system()
 end
 
 function _M.sys_prefix()
-    return _M.is_http_system() and '' or 'stream_'
+    return _M.is_http_system() and 'http_' or 'stream_'
 end
 
 return _M

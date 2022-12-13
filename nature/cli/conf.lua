@@ -206,11 +206,11 @@ http {
             proxy_temp_path = http.proxy_temp_path
         end
     %}
-    lua_shared_dict healthcheck {*healthcheck_size*};
-    lua_shared_dict lrucache_lock {*lrucache_lock_size*};
-    lua_shared_dict process_events {*process_events_size*};
-    lua_shared_dict balancer-ewma {*balancer_ewma_size*};
-    lua_shared_dict balancer-ewma-last-touched-at {*balancer_ewma_last_touched_at_size*};
+    lua_shared_dict http_healthcheck {*healthcheck_size*};
+    lua_shared_dict http_lrucache_lock {*lrucache_lock_size*};
+    lua_shared_dict http_process_events {*process_events_size*};
+    lua_shared_dict http_balancer-ewma {*balancer_ewma_size*};
+    lua_shared_dict http_balancer-ewma-last-touched-at {*balancer_ewma_last_touched_at_size*};
 
     {% if http.config then %}
     {% for key, v in ipairs(http.config) do %}

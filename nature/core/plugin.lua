@@ -17,6 +17,7 @@ local function unload_plugin(plugin, name)
 end
 
 function _M.load(load_list)
+
     local loaded_hash = {}
     for _, pkg_name in ipairs(load_list) do
         local old = pkg_loaded[pkg_name]
@@ -128,9 +129,9 @@ end
 function _M.init()
     local prefix = require('nature.core.ngp').sys_prefix()
     local ps = config.get('plugins')
-    local load_key = prefix .. '_load'
+    local load_key = prefix .. 'load'
     load_plugins_change(ps[load_key])
-    local global_ps_key = prefix .. '_global'
+    local global_ps_key = prefix .. 'global'
     global_plugins_change(ps[global_ps_key])
     events.subscribe(load_key, 'plugins_change', load_plugins_change)
     events.subscribe(global_ps_key, 'plugins_change', global_plugins_change)
