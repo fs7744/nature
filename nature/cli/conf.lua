@@ -366,8 +366,8 @@ local function covnert_conf(env, args)
     local config = require('nature.config.manager')
     config.init(params)
     local conf = config.get('system', 'conf')
-    params.events_sock = conf.events_sock
     conf.init_params = json.encode(params)
+    params.events_sock = conf.events_sock
     conf.router_l4 = config.get('router_l4')
     return conf
 end
