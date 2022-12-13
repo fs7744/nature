@@ -20,6 +20,22 @@ local function publish_local(source, key, data)
     events.publish_local(source, key, data)
 end
 
+local function restart()
+    local conf = _M.get('system', 'conf')
+    local ok, err = os.remove(conf.events_sock)
+    if err then
+        log.error(err)
+    end
+    local params = conf.init_params
+    os.execute('sh ' ..
+        params.home ..
+        '/nature.sh init -m etcd -f ' .. params.file .. ' -c ' .. params.conf .. ' --etcd_host ' .. params.etcd_host)
+    attributes, err = ngp.reload()
+    if err then
+        log.error(err)
+    end
+end
+
 local function init_prefix(params)
     _M['config'] = publish_all
     _M['router_l7'] = publish_all
