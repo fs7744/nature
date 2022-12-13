@@ -44,7 +44,7 @@ local function compare_nodes(value)
     end
     if old_dns then
         if not utils.compare_node(old_dns, new_dns) then
-            events.publish_local('upstream_meta', 'upstream_meta_change', value)
+            events.publish_local('upstream', value.key, value)
         end
     else
         value.old_dns = new_dns
