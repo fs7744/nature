@@ -19,7 +19,7 @@ local function upstream_change(data)
     end
 end
 
-local function build_upstream(data)
+local function build_upstream_meta(data)
     log.info('build_upstream ', data.key)
     local nodes = {}
     for _, node in ipairs(data.nodes) do
@@ -36,14 +36,13 @@ local function build_upstream(data)
     local is_passive = data.healthcheck ~= nil and data.healthcheck.is_passive == true
     healthcheck.add_active_target(data.key,
         not is_passive and nodes or nil)
-    events.publish_all('upstream', 'upstream_change',
+    events.publish_all('upstream', 'upstream_meta_change',
         { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes,
             has_healthcheck = data.healthcheck ~= nil, is_passive = is_passive })
 end
 
 function _M.init()
-    local conf = config.get('conf')
-    conf = conf and conf.discovery or nil
+    local conf = config.get('system', 'discovery')
     if conf then
         for _, k in pairs(conf) do
             local ok, p = pcall(require, "nature.discovery." .. k)
@@ -62,9 +61,8 @@ end
 
 function _M.init_worker()
     require("nature.core.healthcheck").init_worker()
-    events.subscribe('upstream', 'upstream_change', upstream_change)
-    local conf = config.get('conf')
-    conf = conf and conf.discovery or nil
+    events.subscribe('upstream', 'upstream_meta_change', upstream_change)
+    local conf = config.get('system', 'discovery')
     if conf then
         for _, k in ipairs(conf) do
             local ok, p = pcall(require, "nature.discovery." .. k)
@@ -81,13 +79,13 @@ function _M.init_worker()
     if not ngp.is_privileged_agent() then
         return
     end
-    events.subscribe('upstream_meta', 'upstream_meta_change', build_upstream)
+    events.subscribe('*', 'upstream_change', build_upstream_meta)
     ngx.timer.at(0, function()
         local upstream = config.get('upstream')
         if upstream then
             for key, value in pairs(upstream) do
                 value.key = key
-                local ok, err = pcall(build_upstream, value)
+                local ok, err = pcall(build_upstream_meta, value)
                 if not ok then
                     log.error('build_upstream ', key, ' failed: ', err)
                 end

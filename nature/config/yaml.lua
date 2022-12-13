@@ -32,6 +32,9 @@ local function load_file(params)
         return nil, err
     end
     cache = conf or {}
+    if cache.system and cache.system.conf then
+        cache.system.conf.init_params = params
+    end
 end
 
 function _M.init(params)
@@ -43,9 +46,11 @@ function _M.init(params)
 end
 
 local function watch_yaml()
-    local attributes, err = lfs.attributes(cache.params.file)
+    local params = cache.system.conf.init_params
+    local file = params.file
+    local attributes, err = lfs.attributes(file)
     if not attributes then
-        log.error("failed to fetch ", cache.params.file, " attributes: ", err)
+        log.error("failed to fetch ", file, " attributes: ", err)
         return
     end
     local last_change_time = attributes.change
@@ -53,8 +58,11 @@ local function watch_yaml()
         return
     end
     yaml_change_time = last_change_time
-    os.execute('sh ' ..
-        cache.params.home .. '/nature.sh init -m yaml -f ' .. cache.params.file .. ' -c ' .. cache.params.conf)
+    attributes, err = os.remove(params.events_sock)
+    if err then
+        log.error(err)
+    end
+    os.execute('sh ' .. params.home .. '/nature.sh init -m yaml -f ' .. file .. ' -c ' .. params.conf)
     attributes, err = ngp.reload()
     if err then
         log.error(err)

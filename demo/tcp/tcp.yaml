@@ -13,9 +13,6 @@ system:
         - 10.15.73.7
         - 10.15.83.7
         - 10.15.42.7
-    discovery:
-      - dns
-      - static
     stream:
       enable: true
       access_log:
@@ -28,7 +25,9 @@ system:
         format: "$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time $upstream_uri $upstream_scheme"
       listens:
         - listen: 127.0.0.1:8981
-
+  discovery:
+    - dns
+    - static
 plugins:
   stream_load:
     - nature.plugins.single_upstream

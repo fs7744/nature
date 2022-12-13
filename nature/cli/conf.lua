@@ -182,6 +182,7 @@ http {
     lua_package_cpath "{*lua_package_cpath*}$prefix/deps/lib64/lua/5.1/?.so;$prefix/deps/lib/lua/5.1/?.so;;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;";
     lua_socket_log_errors off;
     lua_code_cache on;
+    uninitialized_variable_warn off;
 
     client_body_temp_path {* client_body_temp_path *};
     fastcgi_temp_path {* fastcgi_temp_path *};

@@ -109,7 +109,7 @@ function _M.init()
     end
     HOSTS_IP_MATCH_CACHE = hosts
 
-    local c = config.get('conf')
+    local c = config.get('system', 'conf')
     local dns_config = c and c.dns or nil
     if dns_config then
         package.loaded["resty.dns.client"] = nil
