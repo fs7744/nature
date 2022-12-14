@@ -77,6 +77,7 @@ local cmds = {
                 name = "etcd_timeout",
                 description = "etcd timeout",
                 required = false,
+                type = "number",
                 default = 300
             },
             {

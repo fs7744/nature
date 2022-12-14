@@ -9,7 +9,7 @@ if require("nature.core.ngp").is_http_system() then
     local function init()
         local conf = config.get('system', 'conf')
         local opts = {
-            listening = conf.events_sock,
+            listening = 'unix:' .. conf.events_sock,
         }
         ev = require("resty.events").new(opts)
         if not ev then

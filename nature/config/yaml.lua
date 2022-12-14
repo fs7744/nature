@@ -32,9 +32,7 @@ local function load_file(params)
         return nil, err
     end
     cache = conf or {}
-    if cache.system and cache.system.conf then
-        cache.system.conf.init_params = params
-    end
+    cache.init_params = params
 end
 
 function _M.init(params)
@@ -46,7 +44,7 @@ function _M.init(params)
 end
 
 local function watch_yaml()
-    local params = cache.system.conf.init_params
+    local params = cache.init_params
     local file = params.file
     local attributes, err = lfs.attributes(file)
     if not attributes then

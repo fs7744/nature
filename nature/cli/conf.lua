@@ -23,7 +23,7 @@ if not worker_processes then
     worker_processes = 'auto'
 end
 if not events_sock then
-    events_sock = 'unix:/tmp/events.sock'
+    events_sock = '/tmp/events.sock'
 end
 client_body_temp_path = '/tmp/client_body_temp'
 fastcgi_temp_path = '/tmp/fastcgi_temp'
@@ -320,7 +320,7 @@ http {
     }
 
     server {
-        listen {*events_sock*};
+        listen unix:{*events_sock*};
         location / {
             content_by_lua_block {
                 require('nature.core.events').run()

@@ -26,27 +26,41 @@ local function restart()
     if err then
         log.error(err)
     end
-    local params = conf.init_params
-    os.execute('sh ' ..
+    local params = cache.init_params
+    local sh = 'sh ' ..
         params.home ..
-        '/nature.sh init -m etcd -f ' .. params.file .. ' -c ' .. params.conf .. ' --etcd_host ' .. params.etcd_host)
-    attributes, err = ngp.reload()
+        '/nature.sh init -m etcd -c ' ..
+        params.conf ..
+        ' --etcd_host ' ..
+        params.http_host ..
+        ' --etcd_prefix ' ..
+        params.key_prefix ..
+        ' --etcd_timeout ' ..
+        tostring(params.timeout) ..
+        ' --check_conf ' ..
+        (params.check_conf and 'true' or 'false') ..
+        ' --etcd_use_grpc ' ..
+        (params.use_grpc and 'true' or 'false') ..
+        ' --etcd_ssl_verify ' ..
+        (params.ssl_verify and 'true' or 'false') ..
+        (params.user and ' --etcd_user ' .. params.user or '') ..
+        (params.password and ' --etcd_password ' .. params.password or '')
+    ok, err = os.execute(sh)
+    if not ok then
+        log.error('Init failed: ', err, ' sh: ', sh)
+        return
+    end
+    ok, err = ngp.reload()
     if err then
         log.error(err)
     end
 end
 
-local function init_prefix(params)
-    _M['config'] = publish_all
-    _M['router_l7'] = publish_all
-    _M['upstream'] = publish_local
-    _M['system'] = function(key, data)
-        -- restart
-    end
-    _M['router_l4'] = function(key, data)
-        -- restart
-    end
-end
+_M['config'] = publish_all
+_M['router_l7'] = publish_all
+_M['upstream'] = publish_local
+_M['system'] = restart
+_M['router_l4'] = restart
 
 local function update_etcd_version(res)
     if res then
@@ -90,7 +104,7 @@ function _M.get_all_config()
 end
 
 function _M.init(params)
-    init_prefix(params)
+    cache.init_params = params
     local err
     etcd, err = etcdlib.new(table.deepcopy(params))
     if err ~= nil then
@@ -98,9 +112,6 @@ function _M.init(params)
         return nil, err
     end
     _M.get_all_config()
-    if cache.system and cache.system.conf then
-        cache.system.conf.init_params = params
-    end
     return _M
 end
 
@@ -119,7 +130,7 @@ local function watch_config()
     if res_fn == nil then
         local opts = {
             start_revision = cache.etcd_version + 1,
-            timeout = cache.system.conf.init_params.timeout
+            timeout = cache.init_params.timeout
         }
         res_fn, err = etcd:watchdir('', opts)
         if err then

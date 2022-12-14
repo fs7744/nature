@@ -79,7 +79,7 @@ local function parse_args(args, cmd)
             r[o.name] = o.flag
         end
 
-        if o.default and (not r[o.name] or r[o.name] == '#no_args#') then
+        if o.default ~= nil and (not r[o.name] or r[o.name] == '#no_args#') then
             r[o.name] = o.default
         end
 
@@ -88,6 +88,8 @@ local function parse_args(args, cmd)
             local v = r[o.name]
             if t == "boolean" then
                 v = tostring(v) == 'true'
+            elseif t == 'number' then
+                v = tonumber(v)
             end
             r[o.name] = v
         end
