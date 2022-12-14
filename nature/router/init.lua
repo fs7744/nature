@@ -4,6 +4,8 @@ local tb = require('nature.core.table')
 local l4 = require("nature.router.l4")
 local events = require("nature.core.events")
 local l7 = require("nature.router.l7")
+local log = require("nature.core.log")
+local json = require("nature.core.json")
 
 local _M = {}
 
@@ -38,11 +40,14 @@ end
 
 function _M.init()
     if require('nature.core.ngp').is_http_system() then
-
         local routers = config.get('router_l7')
         update(routers, l7)
-        events.subscribe('router_l7', '*', function(data)
-            update(data.load, l7, data.unload)
+        events.subscribe('router_l7', '*', function(data, event)
+            if data == nil then
+                update(nil, l7, { [event] = true })
+            else
+                update({ [event] = data }, l7, nil)
+            end
         end)
     else
         local routers = config.get('router_l4')
