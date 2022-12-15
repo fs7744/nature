@@ -10,6 +10,7 @@
 * [扯一扯技术选型](prepare/choose.md)
 * [lua语言](prepare/lua/index.md)
 * [luarocks介绍](prepare/lua/luarocks.md)
+* [nginx](prepare/nginx.md)
 * openresty
     - [openresty介绍](prepare/openresty/openresty.md)
  
