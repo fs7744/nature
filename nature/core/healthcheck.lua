@@ -61,7 +61,7 @@ local function node_status_changed(data)
         else
             p.failed = p.failed + 1
         end
-
+        log.debug(key, ' ', pool, ' unhealthy (', p.failed, '/', healthcheck.unhealthy_failed, ')')
         if p.failed >= healthcheck.unhealthy_failed then
             log.warn(key, ' ', pool, ' unhealthy')
             shm_healthcheck:set(key .. '#' .. pool, 'unhealthy', healthcheck.unhealthy_expire)
@@ -83,7 +83,9 @@ local function report_failure(key, node, unhealthy_failed, expire)
     log.debug(key, ' ', node.pool, ' unhealthy (', node._failed, '/', unhealthy_failed, ')')
     if node._failed >= unhealthy_failed then
         log.warn(key, ' ', node.pool, ' unhealthy')
-        shm_healthcheck:set(key .. '#' .. node.pool, 'unhealthy', 0)
+        shm_healthcheck:set(key .. '#' .. node.pool, 'unhealthy', expire * 1.5)
+        node._failed = nil
+        node._unhealthy_expire = nil
     end
 end
 
@@ -101,6 +103,8 @@ local function report_success(key, node, healthy_success, expire)
     if node._success >= healthy_success then
         log.warn(key, ' ', node.pool, ' healthy')
         shm_healthcheck:delete(key .. '#' .. node.pool)
+        node._success = nil
+        node._healthy_expire = nil
     end
 end
 

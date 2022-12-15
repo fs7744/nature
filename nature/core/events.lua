@@ -78,7 +78,12 @@ else
     _M.publish_local = publish_local
 
     local function subscribe(source, event, handler)
-        ev.register(handler, source, event)
+        if event == '*' then
+            ev.register(handler, source)
+        else
+            ev.register(handler, source, event)
+        end
+
     end
 
     _M.subscribe = subscribe

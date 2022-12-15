@@ -56,10 +56,6 @@ local function watch_yaml()
         return
     end
     yaml_change_time = last_change_time
-    attributes, err = os.remove(params.events_sock)
-    if err then
-        log.error(err)
-    end
     os.execute('sh ' .. params.home .. '/nature.sh init -m yaml -f ' .. file .. ' -c ' .. params.conf)
     attributes, err = ngp.reload()
     if err then

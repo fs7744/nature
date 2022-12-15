@@ -21,11 +21,6 @@ local function publish_local(source, key, data)
 end
 
 local function restart()
-    local conf = _M.get('system', 'conf')
-    local ok, err = os.remove(conf.events_sock)
-    if err then
-        log.error(err)
-    end
     local params = cache.init_params
     local sh = 'sh ' ..
         params.home ..

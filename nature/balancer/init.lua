@@ -8,7 +8,7 @@ local enable_keepalive          = require('nature.core.ngp').is_http_system() an
 local balancer_set_current_peer = balancer.set_current_peer
 local set_more_tries            = balancer.set_more_tries
 local set_timeouts              = balancer.set_timeouts
-local global_timeout            = { connect = 60, send = 60, read = 60 }
+local global_timeout            = { connect = 5, send = 60, read = 60 }
 local global_keepalive          = {
     pool_size = 6,
     timeout = 60,

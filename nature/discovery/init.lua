@@ -10,17 +10,17 @@ local _M = {}
 
 local upstreams = {}
 
-local function upstream_change(data)
-    local key = data.key
-    local old = upstreams[key]
-    upstreams[key] = data.nodes and lb.create(data.nodes, data.lb, data.has_healthcheck, data.is_passive, key) or nil
+local function upstream_change(data, event)
+    local old = upstreams[event]
+    upstreams[event] = data.nodes and lb.create(data.nodes, data.lb, data.has_healthcheck, data.is_passive, event) or nil
     if old and old.destroy then
         old.destroy()
     end
 end
 
-local function build_upstream_meta(data)
-    log.info('build_upstream ', data.key)
+local function build_upstream_meta(data, event)
+    data.key = event
+    log.info('build_upstream ', event)
     local nodes = {}
     for _, node in ipairs(data.nodes) do
         local discovery = _M[node.discovery]
@@ -32,12 +32,12 @@ local function build_upstream_meta(data)
     for _, node in ipairs(nodes) do
         node.pool = node.host .. ':' .. node.port .. '#' .. (node.hostname or '')
     end
-    log.info('build_upstream ', data.key, ' nodes: ', json.delay_encode(nodes))
+    log.info('build_upstream ', event, ' nodes: ', json.delay_encode(nodes))
     local is_passive = data.healthcheck ~= nil and data.healthcheck.is_passive == true
-    healthcheck.add_active_target(data.key,
+    healthcheck.add_active_target(event,
         not is_passive and nodes or nil)
-    events.publish_all('upstream_meta', data.key,
-        { key = data.key, lb = data.lb, nodes = #nodes == 0 and nil or nodes,
+    events.publish_all('upstream_meta', event,
+        { key = event, lb = data.lb, nodes = #nodes == 0 and nil or nodes,
             has_healthcheck = data.healthcheck ~= nil, is_passive = is_passive })
 end
 
@@ -84,8 +84,7 @@ function _M.init_worker()
         local upstream = config.get('upstream')
         if upstream then
             for key, value in pairs(upstream) do
-                value.key = key
-                local ok, err = pcall(build_upstream_meta, value)
+                local ok, err = pcall(build_upstream_meta, value, key)
                 if not ok then
                     log.error('build_upstream ', key, ' failed: ', err)
                 end
@@ -99,10 +98,10 @@ function _M.pick_server(ctx)
     if not up then
         up = ctx.upstream_key
         up = up and upstreams[up] or nil
-        ctx.picker = up
         if not up then
             return nil, 'no upstream: ' .. (ctx.upstream_key or '')
         end
+        ctx.picker = up
     end
     return up.pick(ctx)
 end
