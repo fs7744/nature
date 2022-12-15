@@ -4,4 +4,6 @@
 * [安装](lua_install.md)
 * [IDE](vscode.md)
 * [数据类型](data_type.md)
+* [变量](variable.md)
+* [控制结构](control_structrues.md)
 * [luarocks介绍](luarocks.md)
