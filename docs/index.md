@@ -9,9 +9,9 @@
     - [网络协议](prepare/protocol.md)
 * [扯一扯技术选型](prepare/choose.md)
 * lua语言
-    - [luarocks介绍](prepare/luarocks.md)
+    - [luarocks介绍](prepare/lua/luarocks.md)
 * openresty
-    - [openresty介绍](prepare/openresty.md)
+    - [openresty介绍](prepare/openresty/openresty.md)
  
 # 文档概述
 
