@@ -15,4 +15,9 @@
 * [openresty中的日期时间函数](time.md)
 * [文件操作](file.md)
 ## 高级
+* [元表](metatable.md)
+* [面向对象编程](object_oriented.md)
+* [点号与冒号操作符的区别](dot_diff.md)
+* [FFI](ffi.md)
+* [什么是 JIT](what_jit.md)
 * [luarocks介绍](luarocks.md)
