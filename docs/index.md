@@ -29,6 +29,8 @@
 
 如需产线使用，请优先考虑它们，如不够场景则可考虑自建
 
+该文档基础知识部分很多节选自 [OpenResty 最佳实践](https://github.com/moonbingbing/openresty-best-practices/blob/master/SUMMARY.md)， 推荐大家阅读
+
 # 仓库结构说明
 ```
 |- demo             示例，主要为配置示例
