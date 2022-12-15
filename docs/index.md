@@ -11,8 +11,7 @@
 * [lua语言](prepare/lua/index.md)
 * [luarocks介绍](prepare/lua/luarocks.md)
 * [nginx](prepare/nginx.md)
-* openresty
-    - [openresty介绍](prepare/openresty/openresty.md)
+* [openresty基础介绍](prepare/openresty/index.md)
  
 # 文档概述
 
