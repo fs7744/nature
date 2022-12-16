@@ -11,6 +11,7 @@ openresty 最好的教程大概就是这份了：[OpenResty 最佳实践](https:
 ## openresty基础目录
 
 * [安装](install.md)
+* [helloworld](helloworld.md)
 
 ## 测试目录
 
