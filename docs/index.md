@@ -1,3 +1,13 @@
+# nature
+
+nature is api gateway, just show you for how to bulid api gateway
+
+本教程将向大家介绍如何构建一个高性能，动态化，http、tcp的api gateway。
+
+不仅包含一个完整可用的代码框架，也具有完整的实践教程，按图索骥即可拥有编写pi gateway的能力。
+
+具体内容 : [https://fs7744.github.io/nature/](https://fs7744.github.io/nature/)
+
 # 目录
 
 ## 知识预备篇
@@ -11,8 +21,15 @@
 * [lua语言](prepare/lua/index.md)
 * [luarocks介绍](prepare/lua/luarocks.md)
 * [nginx](prepare/nginx.md)
-* [openresty基础](prepare/openresty/index.md)
+* [openresty基础](prepare/openresty/index.md)  入门者建议按照下面实践教程逐步理解
  
+## 实践篇
+
+### tcp 代理
+
+* [了解一下基本的tcp代理配置](tcp/conf.md)
+* [如何简化配置](tcp/simple_conf.md)
+
 # 文档概述
 
 本文档目的为介绍如何基于 openresty 构建现代api gateway
