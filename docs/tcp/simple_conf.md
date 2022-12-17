@@ -123,6 +123,21 @@ stream {
 }
 ```
 
+启动服务并测试，与之前保持一样效果
+```sh
+$ openresty -p ~/openresty-test -c openresty.conf #启动
+$ curl http://localhost:8699 -i  #测试
+HTTP/1.1 200 OK
+Date: Fri, 16 Dec 2022 05:19:34 GMT
+Content-Type: text/html
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+HelloWorld
+$ curl http://localhost:8689 -i  #测试没有upstrem的情况
+curl: (56) Recv failure: Connection reset by peer
+```
+
 完整的例子在： [simple_conf.conf](https://github.com/fs7744/nature/blob/main/docs/demo/simple_conf.conf)
 
 下一篇将介绍如何读取yaml中的配置以及如何监听变化

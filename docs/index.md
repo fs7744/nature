@@ -29,6 +29,7 @@ nature is api gateway, just show you for how to bulid api gateway
 
 * [了解一下基本的tcp代理配置](tcp/conf.md)
 * [如何简化配置](tcp/simple_conf.md)
+* [监听yaml配置](tcp/yaml.md)
 
 # 文档概述
 
