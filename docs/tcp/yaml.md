@@ -469,7 +469,7 @@ Connection: keep-alive
 HelloWorld
 ```
 
-完整的例子在： [simple_conf.conf](https://github.com/fs7744/nature/blob/main/docs/demo/simple_conf.conf)
+完整的例子在： [https://github.com/fs7744/nature/blob/main/docs/demo/yaml](https://github.com/fs7744/nature/blob/main/docs/demo/yaml)
 
 ## 小结
 
@@ -488,10 +488,14 @@ HelloWorld
 以下针对一些特别介绍，大家要想搞懂openresty，一定要阅读和理解
 
 - [luarocks介绍](../prepare/lua/luarocks.md)
+- [curl](https://curl.se/docs/manpage.html)
+- [openresty log](../prepare/openresty/log.md)
+- [openresty file](../prepare/lua/file.md)
 - [理解openresty 执行阶段](../prepare/openresty/phase.md)
 - [理解openresty 不同进程](../prepare/openresty/hup.md)
 - [理解openresty timer](../prepare/openresty/timer.md)
 - [理解openresty 热重启机制](../prepare/openresty/hup.md)
+- [进程间通讯](../prepare/ipc.md)
 
 
 ## [目录](https://fs7744.github.io/nature/)

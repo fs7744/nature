@@ -17,6 +17,7 @@ nature is api gateway, just show you for how to bulid api gateway
     - [反向代理是什么？](prepare/reverse_proxy.md)
     - [网络概念](prepare/network.md)
     - [网络协议](prepare/protocol.md)
+    - [进程间通讯](prepare/ipc.md)
 * [扯一扯技术选型](prepare/choose.md)
 * [lua语言](prepare/lua/index.md)
 * [luarocks介绍](prepare/lua/luarocks.md)
