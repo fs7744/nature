@@ -31,6 +31,21 @@ nature is api gateway, just show you for how to bulid api gateway
 * [了解一下基本的tcp代理配置](tcp/conf.md)
 * [如何简化配置](tcp/simple_conf.md)
 * [监听yaml配置](tcp/yaml.md)
+* [基于etcd实现动态配置同步](tcp/etcd.md)
+
+### http 代理
+
+* [了解一下基本的http代理配置](http/conf.md)
+* [路由实现](http/router.md)
+* [负载均衡](http/lb.md)
+* [健康检查](http/healthcheck.md)
+
+## nature 代码
+
+* [项目架构](nature/src.md)
+* [动态插件](nature/plugin.md)
+* [基于正则的waf如何实现](nature/plugin.md)
+* [如何为openresty打patch](nature/patch.md)
 
 # 文档概述
 
