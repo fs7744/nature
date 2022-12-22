@@ -18,6 +18,7 @@ openresty 最好的教程大概就是这份了：[OpenResty 最佳实践](https:
 - [理解openresty 不同进程](process.md)
 - [理解openresty timer](timer.md)
 - [怎样理解 cosocket](cosocket.md)
+- [热重启机制](hup.md)
 ## 测试目录
 
 * [测试框架安装](test_install.md)

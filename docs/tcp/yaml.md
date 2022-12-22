@@ -494,7 +494,7 @@ HelloWorld
 - [理解openresty 执行阶段](../prepare/openresty/phase.md)
 - [理解openresty 不同进程](../prepare/openresty/process.md)
 - [理解openresty timer](../prepare/openresty/timer.md)
-- [热重启机制](../prepare/hup.md)
+- [热重启机制](../prepare/openresty/hup.md)
 - [进程间通讯](../prepare/ipc.md)
 
 
