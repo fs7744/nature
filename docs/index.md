@@ -32,7 +32,6 @@ nature is api gateway, just show you for how to bulid api gateway
 * [了解一下基本的tcp代理配置](tcp/conf.md)
 * [如何简化配置](tcp/simple_conf.md)
 * [监听yaml配置](tcp/yaml.md)
-* [基于etcd实现动态配置同步](tcp/etcd.md)
 
 ### http 代理
 
@@ -40,6 +39,7 @@ nature is api gateway, just show you for how to bulid api gateway
 * [路由实现](http/router.md)
 * [负载均衡](http/lb.md)
 * [健康检查](http/healthcheck.md)
+* [基于etcd实现动态配置同步](http/etcd.md)
 
 ## nature 代码
 
