@@ -68,4 +68,5 @@ stream（tcp、udp 代理）涉及阶段如下：
 - preread_by_lua*: tcp 第一次握手建立的时机
 - log_by_lua*: 会话完成后本地异步完成日志记录(日志可以记录在本地，还可以同步到其他机器)
 
-后续会结合具体实例
+## [openresty基础目录](https://fs7744.github.io/nature/prepare/openresty/index.html)
+## [总目录](https://fs7744.github.io/nature/)

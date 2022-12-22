@@ -15,7 +15,8 @@ openresty 最好的教程大概就是这份了：[OpenResty 最佳实践](https:
 * [理解执行阶段](phase.md)
 * [使用 Nginx 内置绑定变量](inline_var.md)
 * [不同阶段共享变量](share_var.md)
-
+- [理解openresty 不同进程](process.md)
+- [理解openresty timer](timer.md)
 ## 测试目录
 
 * [测试框架安装](test_install.md)
