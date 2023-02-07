@@ -115,3 +115,155 @@ linkerd 做过一个负载均衡的测验，其结果  （当然并不一定代�
 所以现在一般这些负载均衡算法都会提供 权重参数以便大家预设负载比例，
 
 甚至一些还尝试用机器学习等手段动态调整权重参数等，以便更快调整资源负载情况
+
+## 轮循（Round Robin) 简单实现
+
+篇幅关系，这里不解释每一个怎么实现了，只介绍 轮循（Round Robin)
+
+以下内容更新到 openresty-dev-1.rockspec
+
+```
+-- 依赖包
+dependencies = {
+    "lua-resty-balancer >= 0.04",
+}
+```
+
+然后执行 
+
+``` sh
+luarocks install openresty-dev-1.rockspec --tree=deps --only-deps --local
+```
+
+具体demo 代码如下：
+
+``` nginx
+worker_processes  1;        #nginx worker 数量
+error_log logs/error.log;   #指定错误日志文件路径
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format main '$remote_addr [$time_local] $status $request_time $upstream_status $upstream_addr $upstream_response_time';
+    access_log logs/access.log main buffer=16384 flush=3;            #access_log 文件配置
+
+    lua_package_path  "$prefix/deps/share/lua/5.1/?.lua;$prefix/deps/share/lua/5.1/?/init.lua;$prefix/?.lua;$prefix/?/init.lua;;./?.lua;/usr/local/openresty/luajit/share/luajit-2.1.0-beta3/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/openresty/luajit/share/lua/5.1/?.lua;/usr/local/openresty/luajit/share/lua/5.1/?/init.lua;";
+    lua_package_cpath "$prefix/deps/lib64/lua/5.1/?.so;$prefix/deps/lib/lua/5.1/?.so;;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;";
+    # 开启 lua code 缓存
+    lua_code_cache on;  
+
+    upstream nature_upstream {
+        server 127.0.0.1:6699; #upstream 配置为 hello world 服务
+
+        # 一样的balancer
+        balancer_by_lua_block {
+            local balancer = require "ngx.balancer"
+            local upstream = ngx.ctx.api_ctx.upstream
+            local ok, err = balancer.set_current_peer(upstream.host, upstream.port)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set the current peer: ", err)
+                return ngx.exit(ngx.ERROR)
+            end
+        }
+    }
+
+    init_by_lua_block {
+
+        -- 初始化 lb
+        local roundrobin = require("resty.roundrobin") 
+        local nodes = {k1 = {host = '127.0.0.1', port = 6698}, k2 = {host = '127.0.0.1', port = 6699}}
+        local ns = {}
+        for k, v in pairs(nodes) do
+            -- 初始化 weight 
+            ns[k] = 1
+        end
+        local picker = roundrobin:new(ns)
+
+        -- 初始化路由
+        local radix = require("resty.radixtree")
+        local r = radix.new({
+            {paths = {'/aa/d'}, metadata = picker},
+        })
+
+        -- 匹配路由
+        router_match = function()
+            local p, err = r:match(ngx.var.uri, {})
+            if err then
+                log.error(err)
+            end
+
+            -- 执行 roundrobin lb 选择
+            local k, err = p:find()
+            if not k then
+                return nil, err
+            end
+            return nodes[k]
+        end
+    }
+
+    server {
+		#监听端口，若你的8699端口已经被占用，则需要修改
+        listen 8699 reuseport;
+
+        location / {
+
+            # 在access阶段匹配路由
+            access_by_lua_block {
+                local upstream = router_match()
+                if upstream then
+                    ngx.ctx.api_ctx = { upstream = upstream }
+                else
+                    ngx.exit(404)
+                end
+            }
+
+            proxy_http_version                  1.1;
+            proxy_pass http://nature_upstream; #转发到 upstream
+        }
+    }
+
+
+    #为了大家方便理解和测试，我们引入一个hello world 服务
+    server {
+		#监听端口，若你的6699端口已经被占用，则需要修改
+        listen 6699;
+        location / {
+            default_type text/html;
+
+            content_by_lua_block {
+                ngx.say("HelloWorld")
+            }
+        }
+    }
+}
+```
+
+启动服务并测试
+```sh
+$ openresty -p ~/openresty-test -c openresty.conf #启动
+$ curl --request GET 'http://127.0.0.1:8699/aa/d'  #第一次
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+</body>
+</html>
+$ curl --request GET 'http://127.0.0.1:8699/aa/d'  #第二次
+HelloWorld
+$ curl --request GET 'http://127.0.0.1:8699/aa/d'  #第三次
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+</body>
+</html>
+$ curl --request GET 'http://127.0.0.1:8699/aa/d'  #第四次
+HelloWorld
+```
+
+可以看到 一次失败一次成功轮着来，证明 lb 起效
+
+所有这里介绍的lb实现都可以参考 [nature 中的例子](https://github.com/fs7744/nature/tree/main/nature/balancer)
+
+## [目录](https://fs7744.github.io/nature/)
