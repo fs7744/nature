@@ -6,6 +6,8 @@ nature is api gateway, just show you for how to bulid api gateway
 
 不仅包含一个完整可用的代码框架，也具有完整的实践教程，按图索骥即可拥有编写api gateway的能力。
 
+但是需注意，本教程不会是傻瓜式一步一步带你怎么做，只会拆分细点说明一些核心要点。
+
 具体内容 : [https://fs7744.github.io/nature/](https://fs7744.github.io/nature/)
 
 # 目录
@@ -44,7 +46,6 @@ nature is api gateway, just show you for how to bulid api gateway
 
 * [项目架构](nature/src.md)
 * [动态插件](nature/plugin.md)
-* [基于正则的waf如何实现](nature/plugin.md)
 * [如何为openresty打patch](nature/patch.md)
 
 # 文档概述
