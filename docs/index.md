@@ -47,6 +47,7 @@ nature is api gateway, just show you for how to bulid api gateway
 * [项目架构](nature/src.md)
 * [动态插件](nature/plugin.md)
 * [如何为openresty打patch](nature/patch.md)
+* [openresty 中如何使用 wasm](nature/wasm.md)
 
 # 文档概述
 
